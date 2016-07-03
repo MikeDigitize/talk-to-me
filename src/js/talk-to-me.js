@@ -13,6 +13,7 @@ console.log(ttm);
 ttm.onNoSupport();
 
 ttm.on('result', onResult);
+ttm.on('poop', onResult);
 
 function onResult(evt) {
   console.log('some results', evt);

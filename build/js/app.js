@@ -65,6 +65,7 @@
 	ttm.onNoSupport();
 
 	ttm.on('result', onResult);
+	ttm.on('poop', onResult);
 
 	function onResult(evt) {
 	  console.log('some results', evt);
@@ -196,45 +197,48 @@
 		});
 	};
 
-	var eventListeners = {
-		start: [function () {
-			return console.log('started!');
-		}],
-		end: [function () {
-			return console.log('end!');
-		}],
-		audioend: [function () {
-			return console.log('audioend!');
-		}],
-		audiostart: [function () {
-			return console.log('audiostart!');
-		}],
-		error: [function () {
-			return console.log('error!');
-		}],
-		nomatch: [function () {
-			return console.log('nomatch!');
-		}],
-		result: [function () {
-			return console.log('result!');
-		}],
-		soundend: [function () {
-			return console.log('soundend!');
-		}],
-		soundstart: [function () {
-			return console.log('soundstart!');
-		}],
-		speechend: [function () {
-			return console.log('speechend!');
-		}],
-		speechstart: [function () {
-			return console.log('speechstart!');
-		}]
-	};
-
 	var defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
+	var defaultEventErrorMessage = 'Sorry the speech recognition API does not support this event';
 	var defaultNoSupportFunction = function defaultNoSupportFunction() {
 		return alert(defaultNoSupportMessage);
+	};
+
+	var onStart = function onStart() {
+		return console.log('started!');
+	};
+	var onEnd = function onEnd() {
+		return console.log('end!');
+	};
+	var onAudioEnd = function onAudioEnd() {
+		return console.log('audioend!');
+	};
+	var onAudioStart = function onAudioStart() {
+		return console.log('audiostart!');
+	};
+	var onError = function onError() {
+		return console.log('error!');
+	};
+	var onNoMatch = function onNoMatch() {
+		return console.log('nomatch!');
+	};
+	var onResult = function onResult() {
+		return console.log('result!');
+	};
+	var onSoundEnd = function onSoundEnd() {
+		return console.log('soundend!');
+	};
+	var onSoundStart = function onSoundStart() {
+		return console.log('soundstart!');
+	};
+	var onSpeechEnd = function onSpeechEnd() {
+		return console.log('speechend!');
+	};
+	var onSpeechStart = function onSpeechStart() {
+		return console.log('speechstart!');
+	};
+
+	var throwError = function throwError(msg) {
+		throw new Error(msg);
 	};
 
 	var TalkToMe = function () {
@@ -261,7 +265,21 @@
 				this.speech.lang = language || 'en-US'; // HTML lang attribute - defaults to English
 				this.stopListening = false;
 
-				addDefaultEvents.call(this.speech, eventListeners);
+				this.eventListeners = {
+					start: [onStart.bind(this.speech)],
+					end: [onEnd.bind(this.speech)],
+					audioend: [onAudioEnd.bind(this.speech)],
+					audiostart: [onAudioEnd.bind(this.speech)],
+					error: [onError.bind(this.speech)],
+					nomatch: [onNoMatch.bind(this.speech)],
+					result: [onResult.bind(this.speech)],
+					soundend: [onSoundEnd.bind(this.speech)],
+					soundstart: [onSoundStart.bind(this.speech)],
+					speechend: [onSpeechEnd.bind(this.speech)],
+					speechstart: [onSpeechStart.bind(this.speech)]
+				};
+
+				addDefaultEvents.call(this.speech, this.eventListeners);
 			}
 		}
 
@@ -285,12 +303,15 @@
 			key: 'on',
 			value: function on(evt, callback) {
 				if (this.support) {
-					var isValidEvent = !!Object.keys(eventListeners).find(function (speechEvents) {
+					var isValidEvent = !!Object.keys(this.eventListeners).find(function (speechEvents) {
 						return speechEvents === evt;
 					});
+					console.log(isValidEvent);
 					if (isValidEvent) {
-						this.speech.addEventListener(evt, callback);
-						eventListeners[evt].push(callback);
+						this.speech.addEventListener(evt, callback.bind(this.speech));
+						this.eventListeners[evt].push(callback);
+					} else {
+						throwError(defaultEventErrorMessage);
 					}
 				}
 			}
@@ -298,12 +319,12 @@
 			key: 'off',
 			value: function off(evt, callback) {
 				if (this.support) {
-					var isValidEvent = !!Object.keys(eventListeners).find(function (speechEvents) {
+					var isValidEvent = !!Object.keys(this.eventListeners).find(function (speechEvents) {
 						return speechEvents === evt;
 					});
 					if (isValidEvent) {
 						this.speech.removeEventListener(evt, callback);
-						eventListeners[evt].splice(eventListeners[evt].indexOf(callback), 1);
+						this.eventListeners[evt].splice(this.eventListeners[evt].indexOf(callback), 1);
 					}
 				}
 			}
