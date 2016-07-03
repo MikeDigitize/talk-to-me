@@ -1,13 +1,44 @@
 //import annyang from 'js/annyang';
 import TalkToMe from './ttm';
 
-let ttm = new TalkToMe();
+let numOfAlternativeMatches = 10;
+let finalResultsOnly = true;
+
+let ttm = new TalkToMe({
+  numOfAlternativeMatches, finalResultsOnly
+});
 
 console.log(ttm);
 
 ttm.onNoSupport(() => {
   alert('Try using a more modern browser like Chrome or Firefox');
 });
+
+// ttm.on('result', evt => {
+//   console.log(evt);
+// });
+
+// ttm.on('speechstart', evt => {
+//   console.log('speechstart')
+// });
+
+// ttm.on('speechend', evt => {
+//   console.log('speechend')
+// });
+
+// ttm.on('soundstart', evt => {
+//   console.log('soundstart')
+// });
+
+// ttm.on('soundend', evt => {
+//   console.log('soundend')
+// });
+
+// ttm.on('end', evt => {
+//   console.log('end')
+// });
+
+ttm.start();
 
 // let allow = true;
 
