@@ -10,11 +10,18 @@ let ttm = new TalkToMe({
 
 console.log(ttm);
 
-ttm.onNoSupport(() => {
-  alert('Try using a more modern browser like Chrome or Firefox');
-});
+ttm.onNoSupport();
 
-// ttm.on('result', evt => {
+ttm.on('result', onResult);
+
+function onResult(evt) {
+  console.log('some results', evt);
+  ttm.off('result', onResult);
+}
+
+
+
+// ttm.on('poop', evt => {
 //   console.log(evt);
 // });
 

@@ -1,4 +1,6 @@
-const addEvents = function(listeners) {
+import './polyfills';
+
+const addDefaultEvents = function(listeners) {
 	Object.keys(listeners).forEach(listener => this.addEventListener(listener, listeners[listener][0]));
 }
 
@@ -16,6 +18,9 @@ const eventListeners = {
 	speechstart : [() => console.log('speechstart!')]
 }
 
+const defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
+const defaultNoSupportFunction = () => alert(defaultNoSupportMessage);
+
 export default class TalkToMe {
 
 	constructor(options) {
@@ -31,30 +36,44 @@ export default class TalkToMe {
 			this.speech.continuous = continuous || true;	// not supported in some browsers
 			this.speech.interimResults = finalResultsOnly || true;	// continuously anlayses results if true
 			this.speech.lang = language || 'en-US';	// HTML lang attribute - defaults to English
-			this.isListening = false;
 			this.stopListening = false;
 			
-			addEvents.call(this.speech, eventListeners);
+			addDefaultEvents.call(this.speech, eventListeners);
 
 		}
 
 	}
 
-	onNoSupport(cb = () => {}) {
+	onNoSupport(cb = defaultNoSupportFunction) {
 		if(!this.support) {
 			cb();
 		}		
 	}
 
 	start() {
-		if(this.support && !this.isListening && !this.stopListening) {
+		if(this.support && !this.stopListening) {
 			this.speech.start();
-			this.isListening = true;
 		}
 	}
 
 	on(evt, callback) {
-		//this.callbacks.push({ evt, callback})
+		if(this.support) {
+			let isValidEvent = !!Object.keys(eventListeners).find(speechEvents => speechEvents === evt);
+			if(isValidEvent) {
+				this.speech.addEventListener(evt, callback);
+				eventListeners[evt].push(callback);
+			}
+		}
+	}
+
+	off(evt, callback) {
+		if(this.support) {
+			let isValidEvent = !!Object.keys(eventListeners).find(speechEvents => speechEvents === evt);
+			if(isValidEvent) {
+				this.speech.removeEventListener(evt, callback);
+				eventListeners[evt].splice(eventListeners[evt].indexOf(callback), 1);
+			}
+		}
 	}
 
 	static getSpeechRecogniserConstructor() {

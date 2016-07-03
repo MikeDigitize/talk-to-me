@@ -62,11 +62,16 @@
 
 	console.log(ttm);
 
-	ttm.onNoSupport(function () {
-	  alert('Try using a more modern browser like Chrome or Firefox');
-	});
+	ttm.onNoSupport();
 
-	// ttm.on('result', evt => {
+	ttm.on('result', onResult);
+
+	function onResult(evt) {
+	  console.log('some results', evt);
+	  ttm.off('result', onResult);
+	}
+
+	// ttm.on('poop', evt => {
 	//   console.log(evt);
 	// });
 
@@ -169,7 +174,7 @@
 
 /***/ },
 /* 1 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -179,9 +184,11 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	__webpack_require__(2);
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var addEvents = function addEvents(listeners) {
+	var addDefaultEvents = function addDefaultEvents(listeners) {
 		var _this = this;
 
 		Object.keys(listeners).forEach(function (listener) {
@@ -225,6 +232,11 @@
 		}]
 	};
 
+	var defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
+	var defaultNoSupportFunction = function defaultNoSupportFunction() {
+		return alert(defaultNoSupportMessage);
+	};
+
 	var TalkToMe = function () {
 		function TalkToMe(options) {
 			_classCallCheck(this, TalkToMe);
@@ -247,17 +259,16 @@
 				this.speech.continuous = continuous || true; // not supported in some browsers
 				this.speech.interimResults = finalResultsOnly || true; // continuously anlayses results if true
 				this.speech.lang = language || 'en-US'; // HTML lang attribute - defaults to English
-				this.isListening = false;
 				this.stopListening = false;
 
-				addEvents.call(this.speech, eventListeners);
+				addDefaultEvents.call(this.speech, eventListeners);
 			}
 		}
 
 		_createClass(TalkToMe, [{
 			key: 'onNoSupport',
 			value: function onNoSupport() {
-				var cb = arguments.length <= 0 || arguments[0] === undefined ? function () {} : arguments[0];
+				var cb = arguments.length <= 0 || arguments[0] === undefined ? defaultNoSupportFunction : arguments[0];
 
 				if (!this.support) {
 					cb();
@@ -266,15 +277,35 @@
 		}, {
 			key: 'start',
 			value: function start() {
-				if (this.support && !this.isListening && !this.stopListening) {
+				if (this.support && !this.stopListening) {
 					this.speech.start();
-					this.isListening = true;
 				}
 			}
 		}, {
 			key: 'on',
 			value: function on(evt, callback) {
-				//this.callbacks.push({ evt, callback})
+				if (this.support) {
+					var isValidEvent = !!Object.keys(eventListeners).find(function (speechEvents) {
+						return speechEvents === evt;
+					});
+					if (isValidEvent) {
+						this.speech.addEventListener(evt, callback);
+						eventListeners[evt].push(callback);
+					}
+				}
+			}
+		}, {
+			key: 'off',
+			value: function off(evt, callback) {
+				if (this.support) {
+					var isValidEvent = !!Object.keys(eventListeners).find(function (speechEvents) {
+						return speechEvents === evt;
+					});
+					if (isValidEvent) {
+						this.speech.removeEventListener(evt, callback);
+						eventListeners[evt].splice(eventListeners[evt].indexOf(callback), 1);
+					}
+				}
 			}
 		}], [{
 			key: 'getSpeechRecogniserConstructor',
@@ -288,6 +319,35 @@
 	}();
 
 	exports.default = TalkToMe;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	if (!Array.prototype.find) {
+	  Array.prototype.find = function (predicate) {
+	    if (this == null) {
+	      throw new TypeError('Array.prototype.find called on null or undefined');
+	    }
+	    if (typeof predicate !== 'function') {
+	      throw new TypeError('predicate must be a function');
+	    }
+	    var list = Object(this);
+	    var length = list.length >>> 0;
+	    var thisArg = arguments[1];
+	    var value;
+
+	    for (var i = 0; i < length; i++) {
+	      value = list[i];
+	      if (predicate.call(thisArg, value, i, list)) {
+	        return value;
+	      }
+	    }
+	    return undefined;
+	  };
+	}
 
 /***/ }
 /******/ ]);
