@@ -3,9 +3,13 @@ import './polyfills';
 const defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
 const nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
 const defaultNoSupportFunction = () => alert(defaultNoSupportMessage);
+const isCompatibleSpeechRecognitionEvent = function(speechEvents, evt) {
+	return !!Object.keys(speechEvents).find(speechEvent => speechEvent === evt);
+}
 
 const onStart = function() { console.log('started!') };
 const onEnd = function() {
+	this.isListening = false;
 	if(this.autoRestart) {
 		this.start();
 	}
@@ -40,7 +44,7 @@ export default class TalkToMe {
 			this.speech.interimResults = finalResultsOnly || true;	// continuously anlayses results if true
 			this.speech.lang = language || 'en-US';	// HTML lang attribute - defaults to English
 			this.isListening = false;
-			this.autoRestart = true;
+			this.autoRestart = false;
 
 			this.eventListeners = {
 				start : [onStart.bind(this)],
@@ -74,7 +78,7 @@ export default class TalkToMe {
 	}
 
 	start() {
-		if(this.support && !this.isListening && this.autoRestart) {
+		if(this.support && !this.isListening) {
 			this.speech.start();
 			this.isListening = true;
 		}
@@ -89,8 +93,7 @@ export default class TalkToMe {
 
 	on(evt, callback) {
 		if(this.support) {
-			let isValidEvent = !!Object.keys(this.eventListeners).find(speechEvents => speechEvents === evt);
-			if(isValidEvent) {
+			if(isCompatibleSpeechRecognitionEvent(this.eventListeners, evt)) {
 				this.speech.addEventListener(evt, callback.bind(this.speech));
 				this.eventListeners[evt].push(callback);
 			}
@@ -102,10 +105,15 @@ export default class TalkToMe {
 
 	off(evt, callback) {
 		if(this.support) {
-			let isValidEvent = !!Object.keys(this.eventListeners).find(speechEvents => speechEvents === evt);
-			if(isValidEvent) {
-				this.speech.removeEventListener(evt, callback);
-				this.eventListeners[evt].splice(this.eventListeners[evt].indexOf(callback), 1);
+			if(isCompatibleSpeechRecognitionEvent(this.eventListeners, evt)) {
+				let indexOfCallback = this.eventListeners[evt].indexOf(callback);				
+				if(indexOfCallback > -1) {
+					this.speech.removeEventListener(evt, callback);
+					this.eventListeners[evt].splice(indexOfCallback, 1);
+				}				
+			}
+			else {
+				throwError(nonCompatibleSpeechRecognitionEventError);
 			}
 		}
 	}

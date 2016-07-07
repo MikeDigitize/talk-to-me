@@ -63,42 +63,16 @@
 	console.log(ttm);
 
 	ttm.onNoSupport();
+	ttm.autoRestart = true;
 
 	ttm.on('result', onResult);
 	ttm.on('poop', onResult);
 
 	function onResult(evt) {
 	  console.log('some results', evt);
-	  ttm.off('result', onResult);
 	}
 
 	ttm.start();
-
-	// ttm.on('poop', evt => {
-	//   console.log(evt);
-	// });
-
-	// ttm.on('speechstart', evt => {
-	//   console.log('speechstart')
-	// });
-
-	// ttm.on('speechend', evt => {
-	//   console.log('speechend')
-	// });
-
-	// ttm.on('soundstart', evt => {
-	//   console.log('soundstart')
-	// });
-
-	// ttm.on('soundend', evt => {
-	//   console.log('soundend')
-	// });
-
-	// ttm.on('end', evt => {
-	//   console.log('end')
-	// });
-
-	//ttm.start();
 
 	// let allow = true;
 
@@ -196,11 +170,17 @@
 	var defaultNoSupportFunction = function defaultNoSupportFunction() {
 		return alert(defaultNoSupportMessage);
 	};
+	var isCompatibleSpeechRecognitionEvent = function isCompatibleSpeechRecognitionEvent(speechEvents, evt) {
+		return !!Object.keys(speechEvents).find(function (speechEvent) {
+			return speechEvent === evt;
+		});
+	};
 
 	var onStart = function onStart() {
 		console.log('started!');
 	};
 	var onEnd = function onEnd() {
+		this.isListening = false;
 		if (this.autoRestart) {
 			this.start();
 		}
@@ -260,7 +240,7 @@
 				this.speech.interimResults = finalResultsOnly || true; // continuously anlayses results if true
 				this.speech.lang = language || 'en-US'; // HTML lang attribute - defaults to English
 				this.isListening = false;
-				this.autoRestart = true;
+				this.autoRestart = false;
 
 				this.eventListeners = {
 					start: [onStart.bind(this)],
@@ -301,7 +281,7 @@
 		}, {
 			key: 'start',
 			value: function start() {
-				if (this.support && !this.isListening && this.autoRestart) {
+				if (this.support && !this.isListening) {
 					this.speech.start();
 					this.isListening = true;
 				}
@@ -318,10 +298,7 @@
 			key: 'on',
 			value: function on(evt, callback) {
 				if (this.support) {
-					var isValidEvent = !!Object.keys(this.eventListeners).find(function (speechEvents) {
-						return speechEvents === evt;
-					});
-					if (isValidEvent) {
+					if (isCompatibleSpeechRecognitionEvent(this.eventListeners, evt)) {
 						this.speech.addEventListener(evt, callback.bind(this.speech));
 						this.eventListeners[evt].push(callback);
 					} else {
@@ -333,12 +310,14 @@
 			key: 'off',
 			value: function off(evt, callback) {
 				if (this.support) {
-					var isValidEvent = !!Object.keys(this.eventListeners).find(function (speechEvents) {
-						return speechEvents === evt;
-					});
-					if (isValidEvent) {
-						this.speech.removeEventListener(evt, callback);
-						this.eventListeners[evt].splice(this.eventListeners[evt].indexOf(callback), 1);
+					if (isCompatibleSpeechRecognitionEvent(this.eventListeners, evt)) {
+						var indexOfCallback = this.eventListeners[evt].indexOf(callback);
+						if (indexOfCallback > -1) {
+							this.speech.removeEventListener(evt, callback);
+							this.eventListeners[evt].splice(indexOfCallback, 1);
+						}
+					} else {
+						throwError(nonCompatibleSpeechRecognitionEventError);
 					}
 				}
 			}

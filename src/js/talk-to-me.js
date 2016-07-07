@@ -11,44 +11,16 @@ let ttm = new TalkToMe({
 console.log(ttm);
 
 ttm.onNoSupport();
+ttm.autoRestart = true;
 
 ttm.on('result', onResult);
 ttm.on('poop', onResult);
 
 function onResult(evt) {
   console.log('some results', evt);
-  ttm.off('result', onResult);
 }
 
 ttm.start();
-
-
-
-// ttm.on('poop', evt => {
-//   console.log(evt);
-// });
-
-// ttm.on('speechstart', evt => {
-//   console.log('speechstart')
-// });
-
-// ttm.on('speechend', evt => {
-//   console.log('speechend')
-// });
-
-// ttm.on('soundstart', evt => {
-//   console.log('soundstart')
-// });
-
-// ttm.on('soundend', evt => {
-//   console.log('soundend')
-// });
-
-// ttm.on('end', evt => {
-//   console.log('end')
-// });
-
-//ttm.start();
 
 // let allow = true;
 
