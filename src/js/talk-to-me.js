@@ -20,6 +20,8 @@ function onResult(evt) {
   ttm.off('result', onResult);
 }
 
+ttm.start();
+
 
 
 // ttm.on('poop', evt => {
@@ -46,7 +48,7 @@ function onResult(evt) {
 //   console.log('end')
 // });
 
-ttm.start();
+//ttm.start();
 
 // let allow = true;
 

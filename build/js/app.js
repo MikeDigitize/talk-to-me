@@ -72,6 +72,8 @@
 	  ttm.off('result', onResult);
 	}
 
+	ttm.start();
+
 	// ttm.on('poop', evt => {
 	//   console.log(evt);
 	// });
@@ -96,7 +98,7 @@
 	//   console.log('end')
 	// });
 
-	ttm.start();
+	//ttm.start();
 
 	// let allow = true;
 
@@ -189,25 +191,19 @@
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var addDefaultEvents = function addDefaultEvents(listeners) {
-		var _this = this;
-
-		Object.keys(listeners).forEach(function (listener) {
-			return _this.addEventListener(listener, listeners[listener][0]);
-		});
-	};
-
 	var defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
-	var defaultEventErrorMessage = 'Sorry the speech recognition API does not support this event';
+	var nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
 	var defaultNoSupportFunction = function defaultNoSupportFunction() {
 		return alert(defaultNoSupportMessage);
 	};
 
 	var onStart = function onStart() {
-		return console.log('started!');
+		console.log('started!');
 	};
 	var onEnd = function onEnd() {
-		return console.log('end!');
+		if (this.autoRestart) {
+			this.start();
+		}
 	};
 	var onAudioEnd = function onAudioEnd() {
 		return console.log('audioend!');
@@ -238,7 +234,7 @@
 	};
 
 	var throwError = function throwError(msg) {
-		throw new Error(msg);
+		console.error(msg);
 	};
 
 	var TalkToMe = function () {
@@ -263,27 +259,37 @@
 				this.speech.continuous = continuous || true; // not supported in some browsers
 				this.speech.interimResults = finalResultsOnly || true; // continuously anlayses results if true
 				this.speech.lang = language || 'en-US'; // HTML lang attribute - defaults to English
-				this.stopListening = false;
+				this.isListening = false;
+				this.autoRestart = true;
 
 				this.eventListeners = {
-					start: [onStart.bind(this.speech)],
-					end: [onEnd.bind(this.speech)],
-					audioend: [onAudioEnd.bind(this.speech)],
-					audiostart: [onAudioEnd.bind(this.speech)],
-					error: [onError.bind(this.speech)],
-					nomatch: [onNoMatch.bind(this.speech)],
-					result: [onResult.bind(this.speech)],
-					soundend: [onSoundEnd.bind(this.speech)],
-					soundstart: [onSoundStart.bind(this.speech)],
-					speechend: [onSpeechEnd.bind(this.speech)],
-					speechstart: [onSpeechStart.bind(this.speech)]
+					start: [onStart.bind(this)],
+					end: [onEnd.bind(this)],
+					audioend: [onAudioEnd.bind(this)],
+					audiostart: [onAudioEnd.bind(this)],
+					error: [onError.bind(this)],
+					nomatch: [onNoMatch.bind(this)],
+					result: [onResult.bind(this)],
+					soundend: [onSoundEnd.bind(this)],
+					soundstart: [onSoundStart.bind(this)],
+					speechend: [onSpeechEnd.bind(this)],
+					speechstart: [onSpeechStart.bind(this)]
 				};
 
-				addDefaultEvents.call(this.speech, this.eventListeners);
+				this.addDefaultEvents();
 			}
 		}
 
 		_createClass(TalkToMe, [{
+			key: 'addDefaultEvents',
+			value: function addDefaultEvents() {
+				var _this = this;
+
+				Object.keys(this.eventListeners).forEach(function (listener) {
+					return _this.speech.addEventListener(listener, _this.eventListeners[listener][0]);
+				});
+			}
+		}, {
 			key: 'onNoSupport',
 			value: function onNoSupport() {
 				var cb = arguments.length <= 0 || arguments[0] === undefined ? defaultNoSupportFunction : arguments[0];
@@ -295,8 +301,17 @@
 		}, {
 			key: 'start',
 			value: function start() {
-				if (this.support && !this.stopListening) {
+				if (this.support && !this.isListening && this.autoRestart) {
 					this.speech.start();
+					this.isListening = true;
+				}
+			}
+		}, {
+			key: 'stop',
+			value: function stop() {
+				if (this.support && this.isListening) {
+					this.speech.abort();
+					this.isListening = false;
 				}
 			}
 		}, {
@@ -306,12 +321,11 @@
 					var isValidEvent = !!Object.keys(this.eventListeners).find(function (speechEvents) {
 						return speechEvents === evt;
 					});
-					console.log(isValidEvent);
 					if (isValidEvent) {
 						this.speech.addEventListener(evt, callback.bind(this.speech));
 						this.eventListeners[evt].push(callback);
 					} else {
-						throwError(defaultEventErrorMessage);
+						throwError(nonCompatibleSpeechRecognitionEventError);
 					}
 				}
 			}
