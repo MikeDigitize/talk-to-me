@@ -2,6 +2,8 @@ import './polyfills';
 
 const defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
 const nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
+const eventListenerNotFoundError = 'Sorry the listener you\'re trying to remove isn\'t currently active';
+
 const defaultNoSupportFunction = () => alert(defaultNoSupportMessage);
 const isCompatibleSpeechRecognitionEvent = function(speechEvents, evt) {
 	return !!Object.keys(speechEvents).find(speechEvent => speechEvent === evt);
@@ -14,6 +16,12 @@ const onEnd = function() {
 		this.start();
 	}
 };
+
+const addDefaultEvents = function(listeners, speech) {
+	Object.keys(listeners)
+		.forEach(listener => speech.addEventListener(listener, listeners[listener][0]));
+}
+
 const onAudioEnd = () => console.log('audioend!');
 const onAudioStart = () => console.log('audiostart!');
 const onError = () => console.log('error!');
@@ -60,16 +68,11 @@ export default class TalkToMe {
 				speechstart : [onSpeechStart.bind(this)]
 			}
 			
-			this.addDefaultEvents();
+			addDefaultEvents(this.eventListeners, this.speech);
 
 		}
 
-	}
-
-	addDefaultEvents() {
-		Object.keys(this.eventListeners)
-			.forEach(listener => this.speech.addEventListener(listener, this.eventListeners[listener][0]));
-	}
+	}	
 
 	onNoSupport(cb = defaultNoSupportFunction) {
 		if(!this.support) {
@@ -110,7 +113,10 @@ export default class TalkToMe {
 				if(indexOfCallback > -1) {
 					this.speech.removeEventListener(evt, callback);
 					this.eventListeners[evt].splice(indexOfCallback, 1);
-				}				
+				}	
+				else {
+					throwError()
+				}			
 			}
 			else {
 				throwError(nonCompatibleSpeechRecognitionEventError);

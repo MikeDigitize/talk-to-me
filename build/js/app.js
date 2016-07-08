@@ -167,6 +167,8 @@
 
 	var defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
 	var nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
+	var eventListenerNotFoundError = 'Sorry the listener you\'re trying to remove isn\'t currently active';
+
 	var defaultNoSupportFunction = function defaultNoSupportFunction() {
 		return alert(defaultNoSupportMessage);
 	};
@@ -185,6 +187,13 @@
 			this.start();
 		}
 	};
+
+	var addDefaultEvents = function addDefaultEvents(listeners, speech) {
+		Object.keys(listeners).forEach(function (listener) {
+			return speech.addEventListener(listener, listeners[listener][0]);
+		});
+	};
+
 	var onAudioEnd = function onAudioEnd() {
 		return console.log('audioend!');
 	};
@@ -256,20 +265,11 @@
 					speechstart: [onSpeechStart.bind(this)]
 				};
 
-				this.addDefaultEvents();
+				addDefaultEvents(this.eventListeners, this.speech);
 			}
 		}
 
 		_createClass(TalkToMe, [{
-			key: 'addDefaultEvents',
-			value: function addDefaultEvents() {
-				var _this = this;
-
-				Object.keys(this.eventListeners).forEach(function (listener) {
-					return _this.speech.addEventListener(listener, _this.eventListeners[listener][0]);
-				});
-			}
-		}, {
 			key: 'onNoSupport',
 			value: function onNoSupport() {
 				var cb = arguments.length <= 0 || arguments[0] === undefined ? defaultNoSupportFunction : arguments[0];
@@ -315,6 +315,8 @@
 						if (indexOfCallback > -1) {
 							this.speech.removeEventListener(evt, callback);
 							this.eventListeners[evt].splice(indexOfCallback, 1);
+						} else {
+							throwError();
 						}
 					} else {
 						throwError(nonCompatibleSpeechRecognitionEventError);
