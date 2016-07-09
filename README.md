@@ -94,3 +94,22 @@ ttm.onNoSupport(function() {
 
 And that's the base class. It's only 7kb before minification and lets you build an application using just the essentials of the Speech Recognition API.
 
+### Example basic usage
+
+```javascript
+const numOfAlternativeMatches = 3;
+const ttm = new TalkToMe({ numOfAlternativeMatches });
+let wordToSearchFor = 'hello';
+
+function onResult(event) {
+  let { results } = event;
+  if(results[0][0].transcript === wordToSearchFor) {
+    console.log(match);
+  }
+}
+
+ttm.on('result', onResult);
+ttm.start();
+
+```
+
