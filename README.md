@@ -1,10 +1,10 @@
 # Talk to me
 
-Talk to me is a wrapper around the speech recognition API from which you can create custom builds to search your needs. 
+Talk to me is a wrapper around the speech recognition API from which you can create custom builds to suit your needs. 
 
 ### Usage
 
-Either `import`, `require` or add a script tag with the source to get access to class `TalkToMe`.
+Either `import`, `require` or add a script tag with the source to get access to the class `TalkToMe`.
 
 ```javascript
 const ttm = new TalkToMe(options);
@@ -21,7 +21,7 @@ $param {String} language  // defaults to 'en-us'
 
 ### Light version
 
-The light version is the base class and available in the `build` folder as `talk-to-me-light` or by running `gulp light`. To manually extend the base class import `talk-to-me.js` in to your project.
+The light version is the base class and available in the `build` folder as `talk-to-me-light` or will generate by running `gulp light`. To manually extend the base class import `talk-to-me.js` in to your project.
 
 ### Base functionality
 
@@ -31,17 +31,15 @@ Create a new version of `TalkToMe`.
 var ttm = new TalkToMe(); // takes an optional options object
 ```
 
-By default you can start your instance of `TalkToMe` recording by running
+By default you can start your instance of `TalkToMe` recording audio from the microphone by running
 ```javascript
 ttm.start();
 ```
-but seeing as though you haven't defined any events to listen to, nothing will happen, apart from after a while, if no sound has been made, you'll be warned in the console that the Speech Recognition API hasn't received any audio input.
+but seeing as though you haven't defined any events to listen to, nothing will happen, apart from after a while if no sound has been made, you'll be warned in the console that the Speech Recognition API hasn't received any audio input.
 
-So you'll probably want to add an event listener(s) to catch events that fire from the Speech Recognition API.
+### Adding events
 
-### Supported events
-
-The following events are supported by the Speech Recognition API.
+To add an event listener(s) to catch events that fire from the Speech Recognition API use the `on` method. The following events are supported by the Speech Recognition API.
 
 * start
 * end
@@ -55,33 +53,28 @@ The following events are supported by the Speech Recognition API.
 * speechend
 * speechstart
 
-If you try and register an unsupported event you'll get a console warning from your instance of `TalkToMe`. To listen for an event use the `on` method. The `result` event gives you the results of the attempt at speech recognition.
+If you try and register an unsupported event you'll get a console warning from your instance of `TalkToMe`. The `result` event gives the callback an event object that contains the results of the attempt at speech recognition.
 
 ```javascript
 function onResult(event) {
   // the event object contains a results property with result data
 }
 ttm.on('result', onResults);
-
-```
-
-Run 
-```javascript
 ttm.start()
 ```
 
-again and your callback will fire whenever it gets a result. 
+Run `start` again and your callback will fire whenever it gets a result. 
 
 ### Auto-restarting recording
 
-However once it finishes analysing the results the recording will stop. To keep recording continuous set the `autoRestart` property to true.
+However once it finishes analysing the results the recording will stop. To keep recording continuously set the `autoRestart` property to true.
 
 ```javascript
 ttm.autoRestart = true;
 ```
 
 ### Removing a callback
-Easy. Just use the off method passing in the event name and the callback.
+Use the `off` method passing in the event name and the callback to remove.
 
 ```javascript
 ttm.off('result', onResult);
@@ -89,7 +82,7 @@ ttm.off('result', onResult);
 
 ### Non-supporting browsers
 
-By default `TalkToMe` will just fire an alert message informing the user it doesn't support their browser but this can be overridden by passing a response function to the `onNoSupport` method, which fires if no support is detected when initialising an instance of the class.
+`TalkToMe` fires a response if no support is detected when initialising an instance of the class. By default this is just a message in an alert box informing the user that their browser isn't supported but this can be overridden by passing a replacement function to the `onNoSupport` method.
 
 ```javascript
 ttm.onNoSupport(function() {
@@ -97,5 +90,5 @@ ttm.onNoSupport(function() {
 });
 ```
 
-And that's the base class. It's only 3kb and lets you build an application using just the essentials of the Speech Recognition API.
+And that's the base class. It's only 7kb before minification and lets you build an application using just the essentials of the Speech Recognition API.
 
