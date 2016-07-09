@@ -3,13 +3,13 @@ import './polyfills';
 const defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
 const nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
 const eventListenerNotFoundError = 'Sorry the listener you\'re trying to remove isn\'t currently active';
+const noSpeechDetected = 'Sorry no speech detected!';
 
 const defaultNoSupportFunction = () => alert(defaultNoSupportMessage);
 const isCompatibleSpeechRecognitionEvent = function(speechEvents, evt) {
 	return !!Object.keys(speechEvents).find(speechEvent => speechEvent === evt);
 }
 
-const onStart = function() { console.log('started!') };
 const onEnd = function() {
 	this.isListening = false;
 	if(this.autoRestart) {
@@ -19,21 +19,25 @@ const onEnd = function() {
 
 const addDefaultEvents = function(listeners, speech) {
 	Object.keys(listeners)
-		.forEach(listener => speech.addEventListener(listener, listeners[listener][0]));
+		.forEach(listener => {
+			let handler = listeners[listener][0];
+			if(handler) {
+				speech.addEventListener(listener, handler);
+			}			
+		});
 }
 
-const onAudioEnd = () => console.log('audioend!');
-const onAudioStart = () => console.log('audiostart!');
-const onError = () => console.log('error!');
-const onNoMatch = () => console.log('nomatch!');
-const onResult = () => console.log('result!');
-const onSoundEnd = () => console.log('soundend!');
-const onSoundStart = () => console.log('soundstart!');
-const onSpeechEnd = () => console.log('speechend!');
-const onSpeechStart = () => console.log('speechstart!');
+const onError = function(e) {
+	if(e.error === 'no-speech') {
+		console.warn(noSpeechDetected);
+	}
+	else {
+		throwWarning(e.error);
+	}
+}
 
-const throwError = function(msg) {
-	console.error(msg);	
+const throwWarning = function(msg) {
+	console.warn(msg);	
 }
 
 export default class TalkToMe {
@@ -55,17 +59,17 @@ export default class TalkToMe {
 			this.autoRestart = false;
 
 			this.eventListeners = {
-				start : [onStart.bind(this)],
+				start : [],
 				end : [onEnd.bind(this)],
-				audioend : [onAudioEnd.bind(this)],
-				audiostart : [onAudioEnd.bind(this)],
+				audioend : [],
+				audiostart : [],
 				error : [onError.bind(this)],
-				nomatch : [onNoMatch.bind(this)],
-				result : [onResult.bind(this)],
-				soundend : [onSoundEnd.bind(this)],
-				soundstart : [onSoundStart.bind(this)],
-				speechend : [onSpeechEnd.bind(this)],
-				speechstart : [onSpeechStart.bind(this)]
+				nomatch : [],
+				result : [],
+				soundend : [],
+				soundstart : [],
+				speechend : [],
+				speechstart : []
 			}
 			
 			addDefaultEvents(this.eventListeners, this.speech);
@@ -101,7 +105,7 @@ export default class TalkToMe {
 				this.eventListeners[evt].push(callback);
 			}
 			else {
-				throwError(nonCompatibleSpeechRecognitionEventError);
+				throwWarning(nonCompatibleSpeechRecognitionEventError);
 			}
 		}
 	}
@@ -115,11 +119,11 @@ export default class TalkToMe {
 					this.eventListeners[evt].splice(indexOfCallback, 1);
 				}	
 				else {
-					throwError()
+					throwWarning(eventListenerNotFoundError)
 				}			
 			}
 			else {
-				throwError(nonCompatibleSpeechRecognitionEventError);
+				throwWarning(nonCompatibleSpeechRecognitionEventError);
 			}
 		}
 	}

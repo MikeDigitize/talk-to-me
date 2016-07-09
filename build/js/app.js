@@ -52,8 +52,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var numOfAlternativeMatches = 10; //import annyang from 'js/annyang';
-
+	var numOfAlternativeMatches = 10;
 	var finalResultsOnly = true;
 
 	var ttm = new _ttm2.default({
@@ -64,7 +63,6 @@
 
 	ttm.onNoSupport();
 	ttm.autoRestart = true;
-
 	ttm.on('result', onResult);
 	ttm.on('poop', onResult);
 
@@ -73,81 +71,6 @@
 	}
 
 	ttm.start();
-
-	// let allow = true;
-
-	// let categories = ['washing machine', 'dishwasher', 'fridge', 'freezer', 'TV', 'microwave'];
-
-	// function createCommands(...keywords) {
-	//   let commands = {};
-	//   function callback(keyword) {
-	//     SpeechKITT.setInstructionsText(`So you want to shop for ${keyword}?`);
-	//     SpeechKITT.vroom();
-	//   }
-	//   keywords.forEach(keyword => {
-	//     commands[keyword] = callback.bind(null, keyword)
-	//   });
-	//   return commands;
-	// }
-
-	// // Add our commands to annyang
-	// annyang.addCommands(createCommands('washing machines', 'dishwashers', 'fridges', 'freezers', 'TVs'));
-
-	// // Tell KITT to use annyang
-	// SpeechKITT.annyang();
-
-	// SpeechKITT.setInstructionsText('What would you like to shop for today?');
-
-	// // Render KITT's interface
-	// SpeechKITT.vroom();
-
-	// SpeechKITT.startRecognition();
-	// annyang.trigger('What would you like to shop for today?');
-	// annyang.addCallback('result', checkforMatches);
-
-	// function checkforMatches(result) {
-	//   let match;
-	//   if(allow) {
-	//     match = checkForCategories(result.speech, categories);
-	//     if(match.found) {
-	//       allow = false;
-	//     }
-	//     console.log(match);
-	//   }
-	//   if(result.isFinalResult) {
-	//     allow = true;
-	//   }
-	// }
-
-	// function checkForCategories(results, cats) {
-	//   return results.reduce((match, phrase) => {
-	//     let check = searchForCategoryText(phrase.text, cats);
-	//     match.phrase = phrase.text;
-	//     if(check.found) {
-	//       match = check;
-	//     }
-	//     return match;
-	//   }, { found : false, phrase : ''});
-	// }
-
-	// function pluraliseWord(word) {
-	//   return /s$/i.test(word) ? word : `${word}s`;
-	// }
-
-	// function pluraliseRegex(word) {
-	//   return new RegExp(`${word}s?`, 'g');
-	// }
-
-	// function searchForCategoryText(phrase, collection) {
-	//   return collection.reduce((match, category) => {
-	//       let reg = pluraliseRegex(category);
-	//       if(phrase.match(reg) !== null) {
-	//         match.found = true;
-	//         match.phrase = pluraliseWord(category);
-	//       }
-	//       return match;
-	//   }, { found : false, phrase : ''})
-	// }
 
 /***/ },
 /* 1 */
@@ -168,6 +91,7 @@
 	var defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
 	var nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
 	var eventListenerNotFoundError = 'Sorry the listener you\'re trying to remove isn\'t currently active';
+	var noSpeechDetected = 'Sorry no speech detected!';
 
 	var defaultNoSupportFunction = function defaultNoSupportFunction() {
 		return alert(defaultNoSupportMessage);
@@ -178,9 +102,6 @@
 		});
 	};
 
-	var onStart = function onStart() {
-		console.log('started!');
-	};
 	var onEnd = function onEnd() {
 		this.isListening = false;
 		if (this.autoRestart) {
@@ -190,40 +111,23 @@
 
 	var addDefaultEvents = function addDefaultEvents(listeners, speech) {
 		Object.keys(listeners).forEach(function (listener) {
-			return speech.addEventListener(listener, listeners[listener][0]);
+			var handler = listeners[listener][0];
+			if (handler) {
+				speech.addEventListener(listener, handler);
+			}
 		});
 	};
 
-	var onAudioEnd = function onAudioEnd() {
-		return console.log('audioend!');
-	};
-	var onAudioStart = function onAudioStart() {
-		return console.log('audiostart!');
-	};
-	var onError = function onError() {
-		return console.log('error!');
-	};
-	var onNoMatch = function onNoMatch() {
-		return console.log('nomatch!');
-	};
-	var onResult = function onResult() {
-		return console.log('result!');
-	};
-	var onSoundEnd = function onSoundEnd() {
-		return console.log('soundend!');
-	};
-	var onSoundStart = function onSoundStart() {
-		return console.log('soundstart!');
-	};
-	var onSpeechEnd = function onSpeechEnd() {
-		return console.log('speechend!');
-	};
-	var onSpeechStart = function onSpeechStart() {
-		return console.log('speechstart!');
+	var onError = function onError(e) {
+		if (e.error === 'no-speech') {
+			console.warn(noSpeechDetected);
+		} else {
+			throwWarning(e.error);
+		}
 	};
 
-	var throwError = function throwError(msg) {
-		console.error(msg);
+	var throwWarning = function throwWarning(msg) {
+		console.warn(msg);
 	};
 
 	var TalkToMe = function () {
@@ -252,17 +156,17 @@
 				this.autoRestart = false;
 
 				this.eventListeners = {
-					start: [onStart.bind(this)],
+					start: [],
 					end: [onEnd.bind(this)],
-					audioend: [onAudioEnd.bind(this)],
-					audiostart: [onAudioEnd.bind(this)],
+					audioend: [],
+					audiostart: [],
 					error: [onError.bind(this)],
-					nomatch: [onNoMatch.bind(this)],
-					result: [onResult.bind(this)],
-					soundend: [onSoundEnd.bind(this)],
-					soundstart: [onSoundStart.bind(this)],
-					speechend: [onSpeechEnd.bind(this)],
-					speechstart: [onSpeechStart.bind(this)]
+					nomatch: [],
+					result: [],
+					soundend: [],
+					soundstart: [],
+					speechend: [],
+					speechstart: []
 				};
 
 				addDefaultEvents(this.eventListeners, this.speech);
@@ -302,7 +206,7 @@
 						this.speech.addEventListener(evt, callback.bind(this.speech));
 						this.eventListeners[evt].push(callback);
 					} else {
-						throwError(nonCompatibleSpeechRecognitionEventError);
+						throwWarning(nonCompatibleSpeechRecognitionEventError);
 					}
 				}
 			}
@@ -316,10 +220,10 @@
 							this.speech.removeEventListener(evt, callback);
 							this.eventListeners[evt].splice(indexOfCallback, 1);
 						} else {
-							throwError();
+							throwWarning(eventListenerNotFoundError);
 						}
 					} else {
-						throwError(nonCompatibleSpeechRecognitionEventError);
+						throwWarning(nonCompatibleSpeechRecognitionEventError);
 					}
 				}
 			}
