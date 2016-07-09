@@ -23,6 +23,8 @@ let htmlDest = "./build";
 let testConfigSrc = __dirname + "/src/tests/karma.config.js";
 let testSource = "./src/tests/**/*.js";
 
+let jsNames = { light : "talk-to-me-light.js" }; 
+
 let karmaServerWatch = (configSrc, browsers, done) => new Server({
         configFile: configSrc,
         singleRun: true,
@@ -32,7 +34,7 @@ let karmaServerWatch = (configSrc, browsers, done) => new Server({
         done();
     }).start();
 
-gulp.task("js", () => {
+gulp.task("js:prod", () => {
     let devConfig = Object.assign({}, require(webpackConfigSrc), {
         plugins : []
     });
@@ -46,7 +48,7 @@ gulp.task("js:light-build", () => {
     return gulp.src(talkToMeSource)
         .pipe(plumber())
         .pipe(webpackStream(require(webpackConfigSrc)))
-        .pipe(rename("talk-to-me-light.js"))
+        .pipe(rename(jsNames.light))
         .pipe(gulp.dest(jsDest));
 });
 
@@ -69,5 +71,6 @@ gulp.task("watch", function() {
     gulp.watch(testConfigSrc, ["karma"]);
 });
 
-gulp.task("default", ["html", "js", "watch"]);
+gulp.task("default", ["html", "js:prod", "watch"]);
 gulp.task("light", ["js:light-build"]);
+gulp.task("production", ["html", "js:prod", "js:light-build"]);

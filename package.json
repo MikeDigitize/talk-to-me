@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "gulp karma:browser-tests",
-    "start": "parallelshell \"node index.js\" \"gulp\""
+    "start": "parallelshell \"node index.js\" \"gulp production\""
   },
   "repository": {
     "type": "git",
