@@ -105,6 +105,7 @@ function onResult(event) {
   let { results } = event;
   if(results[0][0].transcript === wordToSearchFor) {
     console.log(match);
+    ttm.stop();
   }
 }
 
