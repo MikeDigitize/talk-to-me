@@ -82,7 +82,7 @@ ttm.off('result', onResult);
 
 ### Non-supporting browsers
 
-`TalkToMe` fires a response if no support is detected when initialising an instance of the class. By default this is just a message in an alert box informing the user that their browser isn't supported but this can be overridden by passing a replacement function to the `onNoSupport` method.
+`TalkToMe` has an `onNoSupport` which when called and if no support is detected when initialising an instance of the class will by default show an alert box informing the user that their browser isn't supported but this can be overridden by passing a replacement function to the `onNoSupport` method.
 
 ```javascript
 ttm.onNoSupport(function() {
