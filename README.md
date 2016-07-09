@@ -73,6 +73,8 @@ However once it finishes analysing the results the recording will stop. To keep 
 ttm.autoRestart = true;
 ```
 
+You can set this to false at any point during recording and when the next speech `end` event fires `TalkToMe` will not restart.
+
 ### Removing a callback
 Use the `off` method passing in the event name and the callback to remove.
 
@@ -82,7 +84,7 @@ ttm.off('result', onResult);
 
 ### Non-supporting browsers
 
-`TalkToMe` has an `onNoSupport` which when called and if no support is detected when initialising an instance of the class will by default show an alert box informing the user that their browser isn't supported but this can be overridden by passing a replacement function to the `onNoSupport` method.
+`TalkToMe` has an `onNoSupport` which when called, and if no support is detected when initialising an instance of the class, will by default show an alert box informing the user that their browser isn't supported but this can be overridden by passing a replacement function to the `onNoSupport` method.
 
 ```javascript
 ttm.onNoSupport(function() {
