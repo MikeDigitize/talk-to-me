@@ -1,4 +1,14 @@
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else {
+		var a = factory();
+		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
+	}
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 
@@ -42,39 +52,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _ttm = __webpack_require__(1);
-
-	var _ttm2 = _interopRequireDefault(_ttm);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var numOfAlternativeMatches = 10;
-	var finalResultsOnly = true;
-
-	var ttm = new _ttm2.default({
-	  numOfAlternativeMatches: numOfAlternativeMatches, finalResultsOnly: finalResultsOnly
-	});
-
-	console.log(ttm);
-
-	ttm.onNoSupport();
-	ttm.autoRestart = true;
-	ttm.on('result', onResult);
-	ttm.on('poop', onResult);
-
-	function onResult(evt) {
-	  console.log('some results', evt);
-	}
-
-	ttm.start();
-
-/***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -83,8 +61,6 @@
 	});
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	__webpack_require__(2);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -96,15 +72,13 @@
 	var defaultNoSupportFunction = function defaultNoSupportFunction() {
 		return alert(defaultNoSupportMessage);
 	};
+
 	var isCompatibleSpeechRecognitionEvent = function isCompatibleSpeechRecognitionEvent(speechEvents, evt) {
-		return !!Object.keys(speechEvents).find(function (speechEvent) {
-			return speechEvent === evt;
-		});
+		return Object.keys(speechEvents).indexOf(evt) > -1;
 	};
 
 	var onEnd = function onEnd() {
-		this.isListening = false;
-		if (this.autoRestart) {
+		if (this.autoRestart && this.isListening) {
 			this.start();
 		}
 	};
@@ -130,8 +104,10 @@
 		console.warn(msg);
 	};
 
-	var TalkToMe = function () {
-		function TalkToMe(options) {
+	var TalkToMe = exports.TalkToMe = function () {
+		function TalkToMe() {
+			var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
 			_classCallCheck(this, TalkToMe);
 
 			var _TalkToMe$getSpeechRe = TalkToMe.getSpeechRecogniserConstructor();
@@ -185,17 +161,25 @@
 		}, {
 			key: 'start',
 			value: function start() {
-				if (this.support && !this.isListening) {
-					this.speech.start();
+				if (this.support) {
 					this.isListening = true;
+					try {
+						this.speech.start();
+					} catch (e) {
+						throwWarning(e);
+					}
 				}
 			}
 		}, {
 			key: 'stop',
 			value: function stop() {
-				if (this.support && this.isListening) {
-					this.speech.abort();
+				if (this.support) {
 					this.isListening = false;
+					try {
+						this.speech.abort();
+					} catch (e) {
+						throwWarning(e);
+					}
 				}
 			}
 		}, {
@@ -238,36 +222,7 @@
 		return TalkToMe;
 	}();
 
-	exports.default = TalkToMe;
-
-/***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	if (!Array.prototype.find) {
-	  Array.prototype.find = function (predicate) {
-	    if (this == null) {
-	      throw new TypeError('Array.prototype.find called on null or undefined');
-	    }
-	    if (typeof predicate !== 'function') {
-	      throw new TypeError('predicate must be a function');
-	    }
-	    var list = Object(this);
-	    var length = list.length >>> 0;
-	    var thisArg = arguments[1];
-	    var value;
-
-	    for (var i = 0; i < length; i++) {
-	      value = list[i];
-	      if (predicate.call(thisArg, value, i, list)) {
-	        return value;
-	      }
-	    }
-	    return undefined;
-	  };
-	}
-
 /***/ }
-/******/ ]);
+/******/ ])
+});
+;
