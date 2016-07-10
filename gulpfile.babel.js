@@ -58,7 +58,7 @@ gulp.task("html", () => {
 });
 
 gulp.task("karma", done => {
-    return karmaServerWatch(testConfigSrc, ["PhantomJS"], done);
+    return karmaServerWatch(testConfigSrc, ["Chrome"], done);
 });
 
 gulp.task("karma:browser-tests", done => {

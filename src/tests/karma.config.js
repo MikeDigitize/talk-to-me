@@ -26,11 +26,11 @@ module.exports = config =>
                 root: [
                     path.resolve("./js"),
                     path.resolve("./tests")],
-                    extensions: ["", ".js", ".jsx"]
+                    extensions: ["", ".js"]
             },
             module: {
                 loaders: [{
-                    test: /\.js$|\.jsx$/,
+                    test: /\.js$/,
                     exclude: /node_modules/,
                     loader: "babel-loader"
                 }]

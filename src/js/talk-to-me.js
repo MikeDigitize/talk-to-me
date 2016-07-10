@@ -123,9 +123,11 @@ export class TalkToMe {
 					this.speech.addEventListener(evt, callback.bind(this.speech));
 				}				
 				this.eventListeners[evt].push(callback);
+				return true;
 			}
 			else {
 				throwWarning(nonCompatibleSpeechRecognitionEventError);
+				return false;
 			}
 		}
 	}
@@ -137,13 +139,16 @@ export class TalkToMe {
 				if(indexOfCallback > -1) {
 					this.speech.removeEventListener(evt, callback);
 					this.eventListeners[evt].splice(indexOfCallback, 1);
+					return true;
 				}	
 				else {
-					throwWarning(eventListenerNotFoundError)
+					throwWarning(eventListenerNotFoundError);
+					return false;
 				}			
 			}
 			else {
 				throwWarning(nonCompatibleSpeechRecognitionEventError);
+				return false;
 			}
 		}
 	}
