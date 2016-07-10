@@ -34,6 +34,16 @@ const onError = function(e) {
 	}
 }
 
+const onResult = function(event) {
+	const isFinalResult = event.results[0].isFinal;
+	const results = [].slice.call(event.results[0]);
+	this.eventListeners.result.forEach((listener, i) => {
+		if(i !== 0) {
+			listener({ isFinalResult, results });
+		}
+	});
+}
+
 const throwWarning = function(msg) {
 	console.warn(msg);	
 }
@@ -47,12 +57,11 @@ export class TalkToMe {
 
 		if(this.support) {
 
-			let { numOfAlternativeMatches, finalResultsOnly, language, continuous } = options;
+			let { numOfAlternativeMatches, language, finalResultsOnly } = options;
 			this.speech = new speech();		
 			this.speech.maxAlternatives = numOfAlternativeMatches || 5;
-			this.speech.continuous = continuous || true;	// not supported in some browsers
-			this.speech.interimResults = finalResultsOnly || true;	// continuously anlayses results if true
-			this.speech.lang = language || 'en-US';	// HTML lang attribute - defaults to English
+			this.speech.interimResults = finalResultsOnly ? false : true;
+			this.speech.lang = language || 'en-US';
 			this.isListening = false;
 			this.autoRestart = false;
 
@@ -63,7 +72,7 @@ export class TalkToMe {
 				audiostart : [],
 				error : [onError.bind(this)],
 				nomatch : [],
-				result : [],
+				result : [onResult.bind(this)],
 				soundend : [],
 				soundstart : [],
 				speechend : [],
@@ -109,7 +118,9 @@ export class TalkToMe {
 	on(evt, callback) {
 		if(this.support) {
 			if(isCompatibleSpeechRecognitionEvent(this.eventListeners, evt)) {
-				this.speech.addEventListener(evt, callback.bind(this.speech));
+				if(evt !== 'result') {
+					this.speech.addEventListener(evt, callback.bind(this.speech));
+				}				
 				this.eventListeners[evt].push(callback);
 			}
 			else {

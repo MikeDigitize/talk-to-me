@@ -34,7 +34,7 @@ let karmaServerWatch = (configSrc, browsers, done) => new Server({
         done();
     }).start();
 
-gulp.task("js:prod", () => {
+gulp.task("js:dev", () => {
     let devConfig = Object.assign({}, require(webpackConfigSrc), {
         plugins : []
     });
@@ -73,4 +73,4 @@ gulp.task("watch", function() {
 
 gulp.task("default", ["html", "js:prod", "watch"]);
 gulp.task("light", ["js:light-build"]);
-gulp.task("production", ["html", "js:prod", "js:light-build"]);
+gulp.task("dev", ["html", "js:dev", "js:light-build"]);

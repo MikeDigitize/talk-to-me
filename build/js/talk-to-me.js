@@ -100,6 +100,16 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	};
 
+	var onResult = function onResult(event) {
+		var isFinalResult = event.results[0].isFinal;
+		var results = [].slice.call(event.results[0]);
+		this.eventListeners.result.forEach(function (listener, i) {
+			if (i !== 0) {
+				listener({ isFinalResult: isFinalResult, results: results });
+			}
+		});
+	};
+
 	var throwWarning = function throwWarning(msg) {
 		console.warn(msg);
 	};
@@ -119,15 +129,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (this.support) {
 				var numOfAlternativeMatches = options.numOfAlternativeMatches;
-				var finalResultsOnly = options.finalResultsOnly;
 				var language = options.language;
-				var continuous = options.continuous;
+				var finalResultsOnly = options.finalResultsOnly;
 
 				this.speech = new speech();
 				this.speech.maxAlternatives = numOfAlternativeMatches || 5;
-				this.speech.continuous = continuous || true; // not supported in some browsers
-				this.speech.interimResults = finalResultsOnly || true; // continuously anlayses results if true
-				this.speech.lang = language || 'en-US'; // HTML lang attribute - defaults to English
+				this.speech.interimResults = finalResultsOnly ? false : true;
+				this.speech.lang = language || 'en-US';
 				this.isListening = false;
 				this.autoRestart = false;
 
@@ -138,7 +146,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					audiostart: [],
 					error: [onError.bind(this)],
 					nomatch: [],
-					result: [],
+					result: [onResult.bind(this)],
 					soundend: [],
 					soundstart: [],
 					speechend: [],
@@ -187,7 +195,9 @@ return /******/ (function(modules) { // webpackBootstrap
 			value: function on(evt, callback) {
 				if (this.support) {
 					if (isCompatibleSpeechRecognitionEvent(this.eventListeners, evt)) {
-						this.speech.addEventListener(evt, callback.bind(this.speech));
+						if (evt !== 'result') {
+							this.speech.addEventListener(evt, callback.bind(this.speech));
+						}
 						this.eventListeners[evt].push(callback);
 					} else {
 						throwWarning(nonCompatibleSpeechRecognitionEventError);
