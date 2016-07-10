@@ -58,9 +58,10 @@ export class TalkToMe {
 		if(this.support) {
 
 			let { numOfAlternativeMatches, language, finalResultsOnly } = options;
+			finalResultsOnly = typeof finalResultsOnly === 'undefined' ? true : !finalResultsOnly;
 			this.speech = new speech();		
 			this.speech.maxAlternatives = numOfAlternativeMatches || 5;
-			this.speech.interimResults = finalResultsOnly ? false : true;
+			this.speech.interimResults = finalResultsOnly;
 			this.speech.lang = language || 'en-US';
 			this.isListening = false;
 			this.autoRestart = false;
