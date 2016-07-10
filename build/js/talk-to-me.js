@@ -132,9 +132,10 @@ return /******/ (function(modules) { // webpackBootstrap
 				var language = options.language;
 				var finalResultsOnly = options.finalResultsOnly;
 
+				finalResultsOnly = typeof finalResultsOnly === 'undefined' ? true : !finalResultsOnly;
 				this.speech = new speech();
 				this.speech.maxAlternatives = numOfAlternativeMatches || 5;
-				this.speech.interimResults = finalResultsOnly ? false : true;
+				this.speech.interimResults = finalResultsOnly;
 				this.speech.lang = language || 'en-US';
 				this.isListening = false;
 				this.autoRestart = false;
@@ -199,8 +200,10 @@ return /******/ (function(modules) { // webpackBootstrap
 							this.speech.addEventListener(evt, callback.bind(this.speech));
 						}
 						this.eventListeners[evt].push(callback);
+						return true;
 					} else {
 						throwWarning(nonCompatibleSpeechRecognitionEventError);
+						return false;
 					}
 				}
 			}
@@ -213,11 +216,14 @@ return /******/ (function(modules) { // webpackBootstrap
 						if (indexOfCallback > -1) {
 							this.speech.removeEventListener(evt, callback);
 							this.eventListeners[evt].splice(indexOfCallback, 1);
+							return true;
 						} else {
 							throwWarning(eventListenerNotFoundError);
+							return false;
 						}
 					} else {
 						throwWarning(nonCompatibleSpeechRecognitionEventError);
+						return false;
 					}
 				}
 			}
