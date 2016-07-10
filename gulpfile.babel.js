@@ -25,7 +25,7 @@ let testSource = "./src/tests/**/*.js";
 
 let jsNames = { light : "talk-to-me-light.js" }; 
 
-let karmaServerWatch = (configSrc, browsers, done) => new Server({
+let karmaServer = (configSrc, browsers, done) => new Server({
         configFile: configSrc,
         singleRun: true,
         autoWatch: false,
@@ -57,20 +57,16 @@ gulp.task("html", () => {
         .pipe(gulp.dest(htmlDest));
 });
 
-gulp.task("karma", done => {
-    return karmaServerWatch(testConfigSrc, ["Chrome"], done);
-});
-
 gulp.task("karma:browser-tests", done => {
-    return karmaServer(testConfigSrc, ["Chrome", "Firefox", "IE10", "IE9"], done);
+    return karmaServer(testConfigSrc, ["Chrome"], done);
 });
 
 gulp.task("watch", function() {
     gulp.watch(htmlSource, ["html"]);
-    gulp.watch(talkToMeSource, ["js:light-build"]);
-    gulp.watch(testConfigSrc, ["karma"]);
+    gulp.watch(talkToMeSource, ["js:light-build", "js:dev"]);
+    gulp.watch(testConfigSrc, ["karma:browser-tests"]);
 });
 
-gulp.task("default", ["html", "js:prod", "watch"]);
-gulp.task("light", ["js:light-build"]);
-gulp.task("dev", ["html", "js:dev", "js:light-build"]);
+gulp.task("default", ["html", "js:dev", "js:light-build", "watch"]);
+gulp.task("light", ["html", "js:light-build"]);
+gulp.task("dev", ["html", "js:dev"]);

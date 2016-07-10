@@ -46,7 +46,6 @@ module.exports = config =>
             require("karma-chrome-launcher"),
             require("karma-firefox-launcher"),
             require("karma-phantomjs-launcher"),
-            require("karma-ie-launcher"),
             require("karma-mocha"),
             require("karma-spec-reporter")
         ],
@@ -61,18 +60,7 @@ module.exports = config =>
 
         autoWatch: false,
 
-        browsers: ["PhantomJS", "Chrome", "Firefox", "IE10", "IE9"],
-
-        customLaunchers: {
-            IE10: {
-                base: 'IE',
-                'x-ua-compatible': 'IE=EmulateIE10'
-            },
-            IE9: {
-                base: 'IE',
-                'x-ua-compatible': 'IE=EmulateIE9'
-            }
-        },
+        browsers: ["PhantomJS", "Chrome", "Firefox"],
 
         singleRun: true,
 
