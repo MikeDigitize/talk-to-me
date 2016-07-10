@@ -1,6 +1,6 @@
 # Talk to me
 
-Talk to me is a wrapper around the speech recognition API from which you can create custom builds to suit your needs. 
+Talk to me is a wrapper around the speech recognition API. 
 
 ### Usage
 
