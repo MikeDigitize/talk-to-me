@@ -132,5 +132,5 @@ ttm.onNoSupport(function() {
 });
 ```
 
-And that's the base class. It's only 7kb before minification and lets you build an application using just the essentials of the Speech Recognition API.
+And that's the base class. It's only 3.8kb before minification and lets you build an application using just the essentials of the Speech Recognition API.
 
