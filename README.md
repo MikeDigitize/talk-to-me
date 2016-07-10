@@ -15,7 +15,7 @@ const ttm = new TalkToMe();
 
 ```javascript
 /*
- * $param {Number} numOfAlternativeMatches // the Speech Recognition API can suggest alternatives
+ * $param {Number} numOfAlternativeMatches // the Speech Recognition API can suggest alternative matches
  * $param {String} language  // the language to listen for
  * $param {Boolean} finalResultsOnly  // whether to report back guesses at speech analysis or final results only
 */
@@ -62,7 +62,7 @@ To add an event listener(s) to catch events that fire from the Speech Recognitio
 * speechend
 * speechstart
 
-If you try and register an unsupported event you'll get a console warning from your instance of `TalkToMe`. To add an event use the `on` method.
+If you try and register an unsupported event you'll get a console warning from your instance of `TalkToMe`.
 
 ```javascript
 /*
