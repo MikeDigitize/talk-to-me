@@ -134,3 +134,14 @@ ttm.onNoSupport(function() {
 
 And that's the base class. It's only 3.8kb before minification and lets you build an application using just the essentials of the Speech Recognition API.
 
+### Coming next
+
+* An expansion to add a result matcher
+* An expansion to create a conversation tree
+* An expansion to connect with the Speech Synthesis API
+* An expansion to add a visual component displaying results / conversations
+
+### Licence
+
+MIT. If this is of any use to anyone - great!
+Also - contributors welcome!
