@@ -4,10 +4,11 @@ Talk to me is a wrapper around the speech recognition API.
 
 ### Usage
 
-Either `import`, `require` or add a script tag with the source to get access to the class `TalkToMe`. As `TalkToMe` is just a class the original, non-transpiled version in the `src` directory will work just fine if you're working exclusively in ES2015 compliant browsers.
+Either `import`, `require` or add a script tag with the source to get access to the class `TalkToMe`.
 
 ```javascript
 const ttm = new TalkToMe();
+
 ```
 ### Options
 
@@ -23,7 +24,9 @@ const ttm = new TalkToMe();
 const language = 'en-us'; // defaults to 'en-us'
 const numOfAlternativeMatches = 5 // defaults to 5
 const finalResultsOnly = false; // defaults to false
+
 const ttm = new TalkToMe({ language, numOfAlternativeMatches, finalResultsOnly });
+
 ```
 
 ## Versions
@@ -39,6 +42,7 @@ From the offset you can start your instance of `TalkToMe` recording audio from t
 ```javascript
 const ttm = new TalkToMe(); 
 ttm.start();
+
 ```
 but seeing as though you haven't defined any events to respond to, nothing will happen, apart from after a while if no sound has been made, you'll be warned in the console that the Speech Recognition API hasn't received any audio input.
 
@@ -66,6 +70,7 @@ If you try and register an unsupported event you'll get a console warning from y
  * $param {Function} callback
  */
 ttm.on('supported-event', callback);
+
 ```
 
 ### The result event
@@ -89,7 +94,8 @@ function onResult(event) {
   }
 }
 ttm.on('result', onResults);
-ttm.start()
+ttm.start();
+
 ```
 
 Run `start` again and your callback will fire whenever it gets a result. Every time you add new events you'll have to run `start` again. You don't have to stop it before starting. 
@@ -100,6 +106,7 @@ Once `TalkToMe` finishes analysing the results the recording will stop. To keep 
 
 ```javascript
 ttm.autoRestart = true;
+
 ```
 
 You can set this to false at any point during recording and when the next speech `end` event fires `TalkToMe` will not restart.
@@ -113,6 +120,7 @@ Use the `off` method passing in the event name and the callback to remove.
  * $param {Function} callback
  */
 ttm.off('result', onResult);
+
 ```
 
 ### Non-supporting browsers
@@ -126,6 +134,7 @@ Instances of `TalkToMe` have an `onNoSupport` method which when called, and if n
 ttm.onNoSupport(function() {
   // do something with non supporting browsers
 });
+
 ```
 
 And that's the base class. It's 3.2kb before minification and allows you build an application using just the essential stuff from the Speech Recognition API.
