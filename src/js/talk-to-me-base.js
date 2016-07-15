@@ -25,7 +25,7 @@ const addDefaultEvents = function(listeners, speech) {
 		});
 }
 
-const onError = function(e) {
+export const onError = function(e) {
 	if(e.error === 'no-speech') {
 		console.warn(noSpeechDetected);
 	}
@@ -44,7 +44,7 @@ const onResult = function(event) {
 	});
 }
 
-const throwWarning = function(msg) {
+export const throwWarning = function(msg) {
 	console.warn(msg);	
 }
 

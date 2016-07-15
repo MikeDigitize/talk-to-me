@@ -1,51 +1,68 @@
-import { TalkToMe as TTM } from './talk-to-me-base';
+import { TalkToMe as TTM, throwWarning } from './talk-to-me-base';
 
 let hasFoundMatch = false;
 
+const searchText = function(results) {
+	return results.reduce((matched, result) => {
+		this.searchTerms.forEach((term, i) => {
+			let searchFor = Object.keys(this.searchTerms[i])[0];
+			let transcript = result.transcript;
+			if(searchFor === transcript || searchFor === `${transcript}s`) {
+				matched.term = searchFor;
+				matched.callback = this.searchTerms[i][searchFor];
+			}
+		});
+		return matched;
+	}, { term : '', callback : () => {} });
+}
+
 const findMatches = function(evt) {
 
-		let { results, isFinalResult } = evt;
+	let { results, isFinalResult } = evt;
 
-		if(!hasFoundMatch) {
+	if(!hasFoundMatch) {
 
-			let match = results.reduce((matched, result) => {
-				this.searchTerms.forEach((term, i) => {
-					let searchFor = Object.keys(this.searchTerms[i])[0];
-					if(searchFor === result.transcript || searchFor === `${result.transcript}s`) {
-						matched.term = searchFor;
-						matched.callback = this.searchTerms[i][searchFor];
-					}
-				});
-				return matched;
-			}, { term : '', callback : () => {} });
+		let match = searchText.call(this, results);
 
-			if(match.term) {
-				hasFoundMatch = true;
-			}
-
+		if(match.term) {
+			hasFoundMatch = true;
 			match.callback.call(this, match.term);
-
-		}
-		
-		if(isFinalResult) {
-			if(!hasFoundMatch && this.onNoMatch) {
-				this.onNoMatch.call(this, results);
-			}
-			hasFoundMatch = false;
-		}
+		}			
 
 	}
+	
+	if(isFinalResult) {
+		if(!hasFoundMatch) {
+			this.onNoMatch.call(this, results);
+		}
+		hasFoundMatch = false;
+	}
+
+}
+
+const resultMatcher = function(evt) {
+	if(this.support && this.searchTerms.length) {
+		findMatches.call(this, evt);
+	}
+}
+
+const onNoMatch = () => throwWarning('Sorry no matches found, try again?');
 
 export class TalkToMe extends TTM {
 
 	constructor(options) {
 		super(options);
 		this.searchTerms = [];
-		this.on('result', this.resultMatcher.bind(this));
+		this.on('result', resultMatcher.bind(this));
+		this.noMatch();
 	}
 
-	match(matches) {
+	match(matches = {}) {
 		if(this.support) {
+			if(!Object.keys(matches).length){
+				throwWarning('match expects an object with a key term and a callback value.');
+				return;
+			}
 			let searchTerms = Object.keys(matches);
 			let searches = searchTerms.map(term => {
 				let obj = {};
@@ -56,34 +73,10 @@ export class TalkToMe extends TTM {
 		}
 	}
 
-	noMatch(callback) {
+	noMatch(callback = onNoMatch) {
 		if(this.support) {
-			this.onNoMatch = callback;
+			this.onNoMatch = callback.bind(this);
 		}
 	}
 
-	resultMatcher(evt) {
-		if(this.support && this.searchTerms.length) {
-			findMatches.call(this, evt);
-		}		
-	}
-
 }
-
-function onMatch(term) {
-	console.log(`So you're interested in ${term}?`);
-}
-
-function onNoMatch(results) {
-	console.log(`Sorry, do you want to try saying that again?`, results);
-}
-
-var ttm = new TalkToMe();
-ttm.autoRestart = true;
-ttm.noMatch(onNoMatch);
-ttm.match({ 
-	'washing machines' : onMatch,
-	'TVs' : onMatch,
-	'AO' : onMatch
-});
-ttm.start();
