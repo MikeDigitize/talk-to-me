@@ -178,7 +178,7 @@ ttm.start();
 
 ### When no matches are found
 
-The `noMatch` method takes a callback that fires when no matches are found. By default `TalkToMe` will show a warning in the console when that's the case. An array of the final results returned from the Speech Recognition API are passed in to the callback.
+The `noMatch` method takes a callback that fires when no matches are found. By default `TalkToMe` will show a warning in the console when that's the case. An array of the final results returned from the Speech Recognition API is passed into the callback.
 
 ```javascript
 
