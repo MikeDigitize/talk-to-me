@@ -141,7 +141,7 @@ ttm.onNoSupport(function() {
 
 ```
 
-And that's the base class. It's 3.2kb before minification and allows you build an application using just the essential stuff from the Speech Recognition API.
+And that's the base class. It's 3.2kb before minification and allows you to build an application using just the essential stuff from the Speech Recognition API.
 
 ### Matcher build
 
@@ -156,6 +156,12 @@ The matcher expansion provides just two new methods to the base class - `match` 
 The `match` method is used to search speech recognition results for specific terms and fire specific callbacks if it finds them. It takes an object as an argument that has as many key value pairs as you need, the key being the search term and its value being the callback to fire when that term is found.
 
 ```javascript
+
+/*
+ * $param {String} (key) // the word to match against
+ * $param {Function} (value) // the callback to fire when the key is matched
+*/
+
 
 function onMatch(term) {
 	console.log(`So you're interested in ${term}?`);
@@ -176,6 +182,9 @@ The `noMatch` method takes a callback that fires when no matches are found. By d
 
 ```javascript
 
+/*
+ * $param {Function} callback // the callback to fire when no matches are found
+*/
 function onNoMatches(results) {
 	console.log(`Sorry, do you want to try saying that again?`, results);
 }
