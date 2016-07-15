@@ -79,7 +79,7 @@ The `result` event is probably the most important event that the Speech Recognit
 
 The modified event object contains two properties: 
 
-`isFinalResult` - a Boolean that indicates if the Speech Recognition API has finishd analysis. If you've specified `finalResultsOnly` to be `true` when creating your instance of `TalkToMe` you'll only get final results. And
+`isFinalResult` - a Boolean that indicates if the Speech Recognition API has finishd analysis. If you've specified `finalResultsOnly` to be `true` when creating your instance of `TalkToMe` you'll only get final results.
 
 `results` - an array of analysis result objects each of which contain two properties: `confidence` a floating point Number between 0 and 1 indicating the API's confidence in the result and `transcript` which is a String representation of the speech analysis.
 
