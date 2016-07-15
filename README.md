@@ -153,7 +153,7 @@ The matcher expansion provides just two new methods to the base class - `match` 
 
 ### Matching terms and phrases
 
-The `match` method is used to search speech recognition results for specific terms and fire specific callbacks if it finds them. It takes an object as an argument that has as many key value pairs as you need, the key being the search term and its value being the callback to fire when that term is found.
+The `match` method is used to search speech recognition results for specific terms and fire specific callbacks if it finds them. It takes an object as an argument that has as many key value pairs as you need, the key being the search term and its value being the callback to fire when that term is found. When a match is found the matched term is passed in to the callback as the first parameter.
 
 ```javascript
 
