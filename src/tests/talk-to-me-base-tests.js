@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { TalkToMe } from '../js/talk-to-me';
+import { TalkToMe } from '../js/talk-to-me-base';
 
 describe('Talk to me', function() {
 

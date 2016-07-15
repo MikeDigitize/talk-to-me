@@ -1,4 +1,4 @@
-import { TalkToMe as TTM } from './talk-to-me';
+import { TalkToMe as TTM } from './talk-to-me-base';
 
 let hasFoundMatch = false;
 

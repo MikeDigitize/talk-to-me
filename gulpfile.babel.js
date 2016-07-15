@@ -12,12 +12,10 @@ import webpack from "webpack";
 import webpackStream from "webpack-stream";
 
 import { Server } from "karma";
+import { config as webpackConfigSrc } from "./webpack.config.js";
 
-let talkToMeSource = "./src/js/talk-to-me.js";
-let matcherSource = "./src/js/result-matcher.js";
+let talkToMeSource = "./src/js/*.js";
 let jsDest = "./build/js";
-let webpackConfigSrc = "./webpack.config.js";
-let webpackConfigMatcherSrc = "./webpack.config.matcher.js";
 
 let htmlSource = "./src/*.html";
 let htmlDest = "./build";
@@ -25,7 +23,7 @@ let htmlDest = "./build";
 let testConfigSrc = __dirname + "/src/tests/karma.config.js";
 let testSource = "./src/tests/**/*.js";
 
-let jsNames = { light : "talk-to-me-light.js", matcher : "talk-to-me-matcher.js" }; 
+let jsNames = { base : "talk-to-me-base.js", matcher : "talk-to-me-matcher.js" }; 
 
 let karmaServer = (configSrc, browsers, done) => new Server({
         configFile: configSrc,
@@ -36,28 +34,24 @@ let karmaServer = (configSrc, browsers, done) => new Server({
         done();
     }).start();
 
-gulp.task("js:dev", () => {
-    let devConfig = Object.assign({}, require(webpackConfigSrc), {
-        plugins : []
-    });
-    return gulp.src(talkToMeSource)
+gulp.task("js:base", () => {
+    let entry = {};
+    entry["talk-to-me"] = "js/talk-to-me-base.js";
+    let config = Object.assign({}, webpackConfigSrc, { entry });
+    return gulp.src("./src/js/talk-to-me-base.js")
         .pipe(plumber())
-        .pipe(webpackStream(devConfig))
-        .pipe(gulp.dest(jsDest));
-});
-
-gulp.task("js:light-build", () => {
-    return gulp.src(talkToMeSource)
-        .pipe(plumber())
-        .pipe(webpackStream(require(webpackConfigSrc)))
-        .pipe(rename(jsNames.light))
+        .pipe(webpackStream(config))
+        .pipe(rename(jsNames.base))
         .pipe(gulp.dest(jsDest));
 });
 
 gulp.task("js:matcher", () => {
-    return gulp.src(matcherSource)
+    let entry = {};
+    entry["talk-to-me"] = "js/talk-to-me-matcher.js";
+    let config = Object.assign({}, webpackConfigSrc, { entry });
+    return gulp.src("./src/js/talk-to-me-matcher.js")
         .pipe(plumber())
-        .pipe(webpackStream(require(webpackConfigMatcherSrc)))
+        .pipe(webpackStream(config))
         .pipe(rename(jsNames.matcher))
         .pipe(gulp.dest(jsDest));
 });
@@ -73,11 +67,10 @@ gulp.task("karma:browser-tests", done => {
 
 gulp.task("watch", function() {
     gulp.watch(htmlSource, ["html"]);
-    gulp.watch(talkToMeSource, ["js:light-build", "js:dev"]);
+    gulp.watch(talkToMeSource, ["js:base", "js:matcher"]);
     gulp.watch(testConfigSrc, ["karma:browser-tests"]);
 });
 
-gulp.task("default", ["html", "js:dev", "js:light-build", "watch"]);
-gulp.task("light", ["html", "js:light-build"]);
-gulp.task("matcher", ["html", "js:matcher"]);
-gulp.task("dev", ["html", "js:dev"]);
+gulp.task("default", ["html", "js:base", "js:matcher", "watch"]);
+gulp.task("base", ["html", "js:base"]);
+gulp.task("base:match", ["html", "js:matcher"]);

@@ -2,12 +2,8 @@ import "babel-core/register";
 import path from "path";
 import webpack from "webpack";
 
-module.exports = {
+export var config = {
     context : path.resolve("src"),
-    entry : {
-        "talk-to-me" : "js/talk-to-me.js",
-        "result-matcher" : "js/result-matcher.js"
-    },
     resolve: {
         root: path.resolve(__dirname + "/src"),
         extensions: ["", ".js", ".json"]
