@@ -77,7 +77,11 @@ ttm.on('supported-event', callback);
 
 The `result` event is probably the most important event that the Speech Recognition API fires as it contains the results of the recording analysis. `TalkToMe` heavily modifies the native event object the Speech Recognition API produces to make it easier to analyse results.
 
-The modified event object contains two properties: `isFinalResult` - a Boolean that indicates if the Speech Recognition API has finishd analysis. If you've specified `finalResultsOnly` to be `true` when creating your instance of `TalkToMe` you'll only get final results and `results`, an array of analysis result objects each of which contain two properties - `confidence` a floating point Number between 0 and 1 indicating the API's confidence in the result and `transcript` which is a String representation of the speech analysis.
+The modified event object contains two properties: 
+
+`isFinalResult` - a Boolean that indicates if the Speech Recognition API has finishd analysis. If you've specified `finalResultsOnly` to be `true` when creating your instance of `TalkToMe` you'll only get final results. And
+
+`results` - an array of analysis result objects each of which contain two properties: `confidence` a floating point Number between 0 and 1 indicating the API's confidence in the result and `transcript` which is a String representation of the speech analysis.
 
 ```javascript
 // basic usage example
