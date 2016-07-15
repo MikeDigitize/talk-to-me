@@ -5,7 +5,6 @@ import webpack from "webpack";
 module.exports = {
     context : path.resolve("src"),
     entry : {
-        "talk-to-me" : "js/talk-to-me.js",
         "result-matcher" : "js/result-matcher.js"
     },
     resolve: {
@@ -25,12 +24,6 @@ module.exports = {
             loader: "babel-loader"
         }]
     },
-    plugins : [
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false
-            }
-        })
-    ],
+    plugins : [],
     watch : true
 };
