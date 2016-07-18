@@ -3,17 +3,28 @@ import { TalkToMe as TTM, throwWarning } from './talk-to-me-base';
 let hasFoundMatch = false;
 
 const searchText = function(results) {
+
+	let searchResults = { term : '', callback : () => {} };
+
 	return results.reduce((matched, result) => {
+		
 		this.searchTerms.forEach((term, i) => {
+
 			let searchFor = Object.keys(this.searchTerms[i])[0];
 			let transcript = result.transcript;
+
+			console.log(searchFor, transcript);
+
 			if(searchFor === transcript || searchFor === `${transcript}s`) {
 				matched.term = searchFor;
 				matched.callback = this.searchTerms[i][searchFor];
 			}
 		});
+
 		return matched;
-	}, { term : '', callback : () => {} });
+		
+	}, searchResults);
+
 }
 
 const findMatches = function(evt) {
@@ -54,7 +65,7 @@ export class TalkToMe extends TTM {
 		super(options);
 		this.searchTerms = [];
 		this.on('result', resultMatcher.bind(this));
-		this.noMatch();
+		this.onNoMatch = onNoMatch;
 	}
 
 	match(matches = {}) {
