@@ -29,7 +29,10 @@ const findMatches = function(evt) {
 	}
 	
 	if(isFinalResult) {
-		if(!hasFoundMatch && this.onNoMatch) {
+		if(!hasFoundMatch) {
+			if(!this.onNoMatch) {
+				this.onNoMatch = onNoMatch;
+			}
 			this.onNoMatch.call(this, results);
 		}
 		hasFoundMatch = false;
