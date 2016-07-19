@@ -23,7 +23,7 @@ let htmlDest = "./build";
 let testConfigSrc = __dirname + "/src/tests/karma.config.js";
 let testSource = "./src/tests/**/*.js";
 
-let jsNames = { base : "talk-to-me-base.js", matcher : "talk-to-me-matcher.js" }; 
+let jsNames = { base : "talk-to-me.js" }; 
 
 let karmaServer = (configSrc, browsers, done) => new Server({
         configFile: configSrc,
@@ -45,17 +45,6 @@ gulp.task("js:base", () => {
         .pipe(gulp.dest(jsDest));
 });
 
-gulp.task("js:matcher", () => {
-    let entry = {};
-    entry["talk-to-me"] = "js/talk-to-me-matcher.js";
-    let config = Object.assign({}, webpackConfigSrc, { entry });
-    return gulp.src("./src/js/talk-to-me-matcher.js")
-        .pipe(plumber())
-        .pipe(webpackStream(config))
-        .pipe(rename(jsNames.matcher))
-        .pipe(gulp.dest(jsDest));
-});
-
 gulp.task("html", () => {
     return gulp.src(htmlSource)
         .pipe(gulp.dest(htmlDest));
@@ -67,10 +56,9 @@ gulp.task("karma:browser-tests", done => {
 
 gulp.task("watch", function() {
     gulp.watch(htmlSource, ["html"]);
-    gulp.watch(talkToMeSource, ["js:base", "js:matcher"]);
+    gulp.watch(talkToMeSource, ["js:base"]);
     gulp.watch(testConfigSrc, ["karma:browser-tests"]);
 });
 
-gulp.task("default", ["html", "js:base", "js:matcher", "watch"]);
+gulp.task("default", ["html", "js:base", "watch"]);
 gulp.task("base", ["html", "js:base"]);
-gulp.task("base:match", ["html", "js:matcher"]);

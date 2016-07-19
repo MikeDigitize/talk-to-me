@@ -1,19 +1,12 @@
-import { TalkToMe as TTM, throwWarning } from './talk-to-me-base';
-
 let hasFoundMatch = false;
 
 const searchText = function(results) {
-
 	let searchResults = { term : '', callback : () => {} };
-
 	return results.reduce((matched, result) => {
 		
 		this.searchTerms.forEach((term, i) => {
-
 			let searchFor = Object.keys(this.searchTerms[i])[0];
 			let transcript = result.transcript;
-
-			console.log(searchFor, transcript);
 
 			if(searchFor === transcript || searchFor === `${transcript}s`) {
 				matched.term = searchFor;
@@ -21,34 +14,26 @@ const searchText = function(results) {
 			}
 		});
 
-		return matched;
-		
+		return matched;		
 	}, searchResults);
-
 }
 
 const findMatches = function(evt) {
-
 	let { results, isFinalResult } = evt;
-
 	if(!hasFoundMatch) {
-
 		let match = searchText.call(this, results);
-
 		if(match.term) {
 			hasFoundMatch = true;
 			match.callback.call(this, match.term);
-		}			
-
+		}	
 	}
 	
 	if(isFinalResult) {
-		if(!hasFoundMatch) {
+		if(!hasFoundMatch && this.onNoMatch) {
 			this.onNoMatch.call(this, results);
 		}
 		hasFoundMatch = false;
 	}
-
 }
 
 const resultMatcher = function(evt) {
@@ -59,14 +44,7 @@ const resultMatcher = function(evt) {
 
 const onNoMatch = () => throwWarning('Sorry no matches found, try again?');
 
-export class TalkToMe extends TTM {
-
-	constructor(options) {
-		super(options);
-		this.searchTerms = [];
-		this.on('result', resultMatcher.bind(this));
-		this.onNoMatch = onNoMatch;
-	}
+export class Matcher {
 
 	match(matches = {}) {
 		if(this.support) {
@@ -80,6 +58,10 @@ export class TalkToMe extends TTM {
 				obj[term] = matches[term];
 				return obj;
 			});
+			if(!this.searchTerms) {
+				this.searchTerms = [];
+				this.on('result', resultMatcher.bind(this));
+			}
 			this.searchTerms = this.searchTerms.concat(searches);
 		}
 	}
