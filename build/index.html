@@ -8,15 +8,16 @@
 <script src="js/talk-to-me.js"></script>
 <script type="text/javascript">
 	var callback = function() {
-		console.log('result!', arguments);
+		console.log('result!', arguments, this);
+		this.searchTerms = [];
+		ttm.conversate({ 'washing machines' : () => console.log('second times the charm...')});
 	}
-	var again = {
+	var listenFor = {
 		'show' : callback,
 		'washing machines' : callback
 	}
-	var count = Object.keys(again).length;
 	var ttm = new TalkToMe();
-	ttm.conversate(again);
+	ttm.match(listenFor);
 	ttm.autoRestart = true;
 	ttm.start();
 </script>
