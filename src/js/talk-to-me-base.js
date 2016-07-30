@@ -1,5 +1,6 @@
 import { combine } from './combine';
 import { Matcher } from './talk-to-me-matcher';
+import { Conversate } from './talk-to-me-conversate';
 
 const defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
 const nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
@@ -51,7 +52,7 @@ export const throwWarning = function(msg) {
 	console.warn(msg);	
 }
 
-export class TalkToMe extends combine(Matcher) {
+export class TalkToMe extends combine(Matcher, Conversate) {
 
 	constructor(options = {}) {
 

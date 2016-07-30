@@ -6,5 +6,19 @@
 <body>
 
 <script src="js/talk-to-me.js"></script>
+<script type="text/javascript">
+	var callback = function() {
+		console.log('result!', arguments);
+	}
+	var again = {
+		'show' : callback,
+		'washing machines' : callback
+	}
+	var count = Object.keys(again).length;
+	var ttm = new TalkToMe();
+	ttm.conversate(again);
+	ttm.autoRestart = true;
+	ttm.start();
+</script>
 </body>
 </html>

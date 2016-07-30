@@ -1,13 +1,13 @@
 let hasFoundMatch = false;
 
 const searchText = function(results) {
+
 	let searchResults = { term : '', callback : () => {} };
 	return results.reduce((matched, result) => {
 		
 		this.searchTerms.forEach((term, i) => {
 			let searchFor = Object.keys(this.searchTerms[i])[0];
 			let transcript = result.transcript;
-
 			if(searchFor === transcript || searchFor === `${transcript}s`) {
 				matched.term = searchFor;
 				matched.callback = this.searchTerms[i][searchFor];
@@ -24,7 +24,7 @@ const findMatches = function(evt) {
 		let match = searchText.call(this, results);
 		if(match.term) {
 			hasFoundMatch = true;
-			match.callback.call(this, match.term);
+			match.callback.call(this, match.term, evt);
 		}	
 	}
 	
@@ -51,6 +51,7 @@ export class Matcher {
 
 	match(matches = {}) {
 		if(this.support) {
+
 			if(!Object.keys(matches).length){
 				throwWarning('match expects an object with a key term and a callback value.');
 				return;
@@ -66,6 +67,7 @@ export class Matcher {
 				this.on('result', resultMatcher.bind(this));
 			}
 			this.searchTerms = this.searchTerms.concat(searches);
+
 		}
 	}
 
