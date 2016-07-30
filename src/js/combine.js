@@ -1,4 +1,4 @@
-export function combine(...constructors) {
+export function Combine(...constructors) {
 	let combined = function() {};
 	combined.prototype = constructors.reduce(function(proto, constructor) {
        	Object.getOwnPropertyNames(constructor.prototype).forEach(function(key) {
@@ -7,6 +7,6 @@ export function combine(...constructors) {
        		}			
 		});
 		return proto;
-	}, {});
+	}, {});	
 	return combined;
 }

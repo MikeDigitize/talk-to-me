@@ -7,16 +7,15 @@
 
 <script src="js/talk-to-me.js"></script>
 <script type="text/javascript">
-	var callback = function() {
-		console.log('result!', arguments, this);
-		this.searchTerms = [];
-		ttm.conversate({ 'washing machines' : () => console.log('second times the charm...')});
+	var callback = function(result) {
+		console.log('result!', result);
 	}
 	var listenFor = {
 		'show' : callback,
 		'washing machines' : callback
 	}
 	var ttm = new TalkToMe();
+	ttm.findMultipleMatches(true);
 	ttm.match(listenFor);
 	ttm.autoRestart = true;
 	ttm.start();

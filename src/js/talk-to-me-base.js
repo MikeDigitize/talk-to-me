@@ -1,4 +1,4 @@
-import { combine } from './combine';
+import { Combine } from './combine';
 import { Matcher } from './talk-to-me-matcher';
 import { Conversate } from './talk-to-me-conversate';
 
@@ -29,12 +29,12 @@ const addDefaultEvents = function(listeners, speech) {
 		});
 }
 
-export const onError = function(e) {
+const onError = function(e) {
 	if(e.error === 'no-speech') {
 		console.warn(noSpeechDetected);
 	}
 	else {
-		throwWarning(e.error);
+		this.throwWarning(e.error);
 	}
 }
 
@@ -48,11 +48,7 @@ const onResult = function(event) {
 	});
 }
 
-export const throwWarning = function(msg) {
-	console.warn(msg);	
-}
-
-export class TalkToMe extends combine(Matcher, Conversate) {
+export class TalkToMe extends Combine(Matcher, Conversate) {
 
 	constructor(options = {}) {
 
@@ -105,7 +101,7 @@ export class TalkToMe extends combine(Matcher, Conversate) {
 				this.speech.start();
 			}
 			catch(e) {
-				throwWarning(e);
+				this.throwWarning(e);
 			}			
 		}
 	}
@@ -117,7 +113,7 @@ export class TalkToMe extends combine(Matcher, Conversate) {
 				this.speech.abort();
 			}
 			catch(e) {
-				throwWarning(e);
+				this.throwWarning(e);
 			}
 		}
 	}
@@ -132,7 +128,7 @@ export class TalkToMe extends combine(Matcher, Conversate) {
 				return true;
 			}
 			else {
-				throwWarning(nonCompatibleSpeechRecognitionEventError);
+				this.throwWarning(nonCompatibleSpeechRecognitionEventError);
 				return false;
 			}
 		}
@@ -148,7 +144,7 @@ export class TalkToMe extends combine(Matcher, Conversate) {
 					return true;
 				}	
 				else {
-					throwWarning(eventListenerNotFoundError);
+					this.throwWarning(eventListenerNotFoundError);
 					return false;
 				}			
 			}
@@ -157,6 +153,10 @@ export class TalkToMe extends combine(Matcher, Conversate) {
 				return false;
 			}
 		}
+	}
+
+	throwWarning(msg) {
+		console.warn(msg);	
 	}
 
 	static getSpeechRecogniserConstructor() {
