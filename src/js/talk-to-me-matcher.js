@@ -43,6 +43,10 @@ const findMatches = function(evt) {
 
 };
 
+const logMatch = function() {
+
+};
+
 const resultMatcher = function(evt) {
 	if(this.support && this.searchTerms.length) {
 		findMatches.call(this, evt);
@@ -62,7 +66,7 @@ export class Matcher {
 	match(matches = {}) {
 		if(this.support) {
 
-			if(!Object.keys(matches).length){
+			if(typeof matches !== 'object' || !Object.keys(matches).length){
 				this.throwWarning('match expects an object with a key term and a callback value.');
 				return;
 			}
@@ -85,10 +89,6 @@ export class Matcher {
 		if(this.support) {
 			this.onNoMatch = callback.bind(this);
 		}
-	}
-
-	findMultipleMatches(allow = false) {
-		this.findMultiples = allow;
 	}
 
 }
