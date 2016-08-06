@@ -2,6 +2,7 @@ let conversation = [];
 
 export class Conversate {
 	conversate(matches) {
+		// this.getFirstMatchOnly = false;
 		this.match(matches);
 	}
 }

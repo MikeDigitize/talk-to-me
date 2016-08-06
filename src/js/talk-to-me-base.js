@@ -67,6 +67,7 @@ export class TalkToMe extends Combine(Matcher, Conversate) {
 			this.speech.lang = language || 'en-US';
 			this.isListening = false;
 			this.autoRestart = false;
+			this.getFirstMatchOnly = true;
 
 			this.eventListeners = {
 				start : [],
