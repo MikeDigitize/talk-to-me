@@ -1,5 +1,4 @@
 let hasFoundMatch = false;
-let matchedTerms = [];
 
 const searchText = function(searchResults) {
 
@@ -13,18 +12,7 @@ const searchText = function(searchResults) {
 			let found = transcript.match(regex);
 
 			if(found) {
-
-				let alreadyFound = matches.reduce((found, match) => {
-					if(Object.keys(match)[0] === searchFor) {
-						found = true;
-					}
-					return found;
-				}, false);
-
-				if(!alreadyFound) {
-					matches.push(this.searchTerms[i]);
-				}
-			    
+				matches.push({ match : this.searchTerms[i], term : transcript });			    
 		    }
 
     	});
@@ -57,16 +45,23 @@ const findMatch = function(evt) {
 
 	console.log(matches)
 
-	// if(match.term) {
+	// let alreadyFound = matches.reduce((found, match) => {
+	// 	if(Object.keys(match)[0].term === searchFor) {
+	// 		found = true;
+	// 	}
+	// 	return found;
+	// }, false);
+
+	// if(!alreadyFound) {
+	// 	let term = Object.keys(this.searchTerms[i])[0];
+	// 	let callback = this.searchTerms[i][term];
+	// 	matches.push({ term, callback });
+	// }
+
+	// if(matches.length) {
 	// 	hasFoundMatch = true;
 	// 	if(this.getFirstMatchOnly) {
-	// 		this.searchTerms = [];
-	// 		match.callback.call(this, match.term, evt);
-	// 	}
-	// 	else {
-	// 		if(matchedTerms.indexOf(match.term) === -1) {
-	// 			matchedTerms.push(match.term);
-	// 		}			
+	// 		//matches[0].callback.call(this, match.term, evt);
 	// 	}
 		
 	// }	

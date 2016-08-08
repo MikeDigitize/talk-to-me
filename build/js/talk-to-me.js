@@ -302,7 +302,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var hasFoundMatch = false;
-	var matchedTerms = [];
 
 	var searchText = function searchText(searchResults) {
 		var _this = this;
@@ -317,17 +316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				var found = transcript.match(regex);
 
 				if (found) {
-
-					var alreadyFound = matches.reduce(function (found, match) {
-						if (Object.keys(match)[0] === searchFor) {
-							found = true;
-						}
-						return found;
-					}, false);
-
-					if (!alreadyFound) {
-						matches.push(_this.searchTerms[i]);
-					}
+					matches.push({ match: _this.searchTerms[i], term: transcript });
 				}
 			});
 
@@ -358,16 +347,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		console.log(matches);
 
-		// if(match.term) {
+		// let alreadyFound = matches.reduce((found, match) => {
+		// 	if(Object.keys(match)[0].term === searchFor) {
+		// 		found = true;
+		// 	}
+		// 	return found;
+		// }, false);
+
+		// if(!alreadyFound) {
+		// 	let term = Object.keys(this.searchTerms[i])[0];
+		// 	let callback = this.searchTerms[i][term];
+		// 	matches.push({ term, callback });
+		// }
+
+		// if(matches.length) {
 		// 	hasFoundMatch = true;
 		// 	if(this.getFirstMatchOnly) {
-		// 		this.searchTerms = [];
-		// 		match.callback.call(this, match.term, evt);
-		// 	}
-		// 	else {
-		// 		if(matchedTerms.indexOf(match.term) === -1) {
-		// 			matchedTerms.push(match.term);
-		// 		}			
+		// 		//matches[0].callback.call(this, match.term, evt);
 		// 	}
 
 		// }	
