@@ -9,7 +9,9 @@
 <script type="text/javascript">
 	// var count = 0; 
 	var callback = function(result) {
-		console.log(result);	
+		console.log('callback', result);	
+		//this.removeMatchTerm()
+
 	}
 	var listenFor = {
 		'show' : callback,
@@ -17,7 +19,7 @@
 	}
 	var ttm = new TalkToMe();
 	ttm.match(listenFor);
-	//ttm.autoRestart = true;
+	ttm.autoRestart = true;
 	ttm.start();
 </script>
 </body>

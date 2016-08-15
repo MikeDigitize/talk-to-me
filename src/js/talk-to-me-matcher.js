@@ -1,26 +1,33 @@
 let hasFoundMatch = false;
+let createSearches;
+let onResultCallback;
 
-const searchText = function(searchResults) {
+const resultMatcher = function(evt) {
+	if(this.support && Object.keys(this.searchForThese).length) {
+		findMatches.call(this, evt);
+	}
+};
 
-	return searchResults.reduce((matches, result) => {
+const createSearchObject = function(searches, search) {
+	let searchResults = {};
+	searchResults.term = search;
+	searchResults.results = [];
+	searchResults.callback = searches[search];
+	searchResults.callbackUsed = false;
+	searchResults.regex = new RegExp(`${search}`, 'i');
+	return searchResults;
+};
 
-		this.searchTerms.forEach((term, i) => {
-
-			let searchFor = Object.keys(this.searchTerms[i])[0];
-			let regex = new RegExp(`${searchFor}s?`, 'ig');
-			let transcript = result.transcript;
-			let found = transcript.match(regex);
-
-			if(found) {
-				matches.push({ match : this.searchTerms[i], term : transcript });			    
-		    }
-
-    	});
-
-    	return matches;
-
-	}, []);
-
+const addToSearch = function() {
+	let records = {};
+	return searches => {
+		Object.keys(searches).forEach(search => {
+			if(!records[search]) {
+				records[search] = createSearchObject(searches, search);
+			}
+		});		
+		return records;
+	}
 }
 
 const findMatches = function(evt) {
@@ -30,58 +37,64 @@ const findMatches = function(evt) {
 	if(!hasFoundMatch) {
 		findMatch.call(this, evt);
 	}
-
-	if(hasFoundMatch && !this.getFirstMatchOnly) {
+	else if(!this.getFirstMatchOnly) {
 		findMatch.call(this, evt);
+	}
+	else {
+		this.off('result', onResultCallback);
+		this.on('result', onResultCallback);	
+		hasFoundMatch = false;
+		// empty results array from each
+		return;
+	}
+
+	if(isFinalResult && !hasFoundMatch) {
+		this.noMatchFound();
 	}
 
 };
 
 const findMatch = function(evt) {
 
-	let { results, isFinalResult } = evt;
-	let noOfTermsToSearchFor = this.searchTerms.length;
-	let matches = searchText.call(this, results);
+	let noOfTermsToSearchFor = this.searchForThese.length;
+	
+	this.searchForThese = Object.assign({}, searchText.call(this, evt));
 
-	console.log(matches)
+	Object.keys(this.searchForThese).forEach(key => {
 
-	// let alreadyFound = matches.reduce((found, match) => {
-	// 	if(Object.keys(match)[0].term === searchFor) {
-	// 		found = true;
-	// 	}
-	// 	return found;
-	// }, false);
+		let { results, callbackUsed } = this.searchForThese[key];
 
-	// if(!alreadyFound) {
-	// 	let term = Object.keys(this.searchTerms[i])[0];
-	// 	let callback = this.searchTerms[i][term];
-	// 	matches.push({ term, callback });
-	// }
+		if(results.length && !callbackUsed) {
+			let { term, results } = this.searchForThese[key];
+			this.searchForThese[key].callback.call(this, { term, results, isFinalResult : evt.isFinalResult });
+			this.searchForThese[key].callbackUsed = true;
+			hasFoundMatch = true;
+		}
 
-	// if(matches.length) {
-	// 	hasFoundMatch = true;
-	// 	if(this.getFirstMatchOnly) {
-	// 		//matches[0].callback.call(this, match.term, evt);
-	// 	}
-		
-	// }	
-
-	// if(isFinalResult) {
-	// 	if(!hasFoundMatch) {
-	// 		this.noMatchFound.call(this, results);
-	// 	}
-	// 	else if(!this.getFirstMatchOnly) {
-	// 		match.callback.call(this, matchedTerms, evt);
-	// 	}
-	// 	hasFoundMatch = false;
-	// }
+	});
 
 }
 
-const resultMatcher = function(evt) {
-	if(this.support && this.searchTerms.length) {
-		findMatches.call(this, evt);
-	}
+const searchText = function(evt) {
+
+	return Object.keys(this.searchForThese).reduce((results, key) => {
+
+		if(!results[key].results.length) {
+
+			let match = evt.results.filter(result => {
+				return result.transcript.match(results[key].regex);
+			});
+
+			if(match.length) {
+				results[key].results.push(match[0]);
+			}
+
+		}	
+
+		return results;
+
+	}, this.searchForThese);
+
 };
 
 const noMatch = function() {
@@ -90,28 +103,27 @@ const noMatch = function() {
 
 export class Matcher {
 
-	match(matches = {}) {
+	match(searches = {}) {
 		if(this.support) {
 
-			if(typeof matches !== 'object' || !Object.keys(matches).length){
+			if(typeof searches !== 'object' || !Object.keys(searches).length){
 				this.throwWarning('match expects an object with a key term and a callback value.');
 				return;
 			}
 
-			let searchTerms = Object.keys(matches);
-			let searches = searchTerms.map(term => {
-				let obj = {};
-				obj[term] = matches[term];
-				return obj;
-			});
-
-			if(!this.searchTerms) {
-				this.searchTerms = [];
-				this.on('result', resultMatcher.bind(this));
+			if(!this.searchForThese) {
+				createSearches = addToSearch();
+				onResultCallback = resultMatcher.bind(this);
+				this.on('result', onResultCallback);
 			}
+			
+			this.searchForThese = createSearches(searches);
+			
+			if(!this.noMatchFound) {
+				this.onNoMatch();
+			}	
 
-			this.searchTerms = this.searchTerms.concat(searches);
-			this.onNoMatch();
+			return true;		
 
 		}
 	}
@@ -120,10 +132,11 @@ export class Matcher {
 		if(this.support) {
 			this.noMatchFound = callback.bind(this);
 		}
+		return true;
 	}
 
 	removeMatchTerm(term) {
-		this.searchTerms = this.searchTerms.filter(searchItem => Object.keys(searchItem) !== term);
+		delete this.searchForThese[term];
 	}
 
 }

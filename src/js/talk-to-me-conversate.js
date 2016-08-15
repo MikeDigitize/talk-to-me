@@ -7,6 +7,16 @@ export class Conversate {
 	}
 }
 
+// const createSearch = function() {
+// 	return new RegExp(this.searchFor.reduce((text, term, i) => {
+// 		if(i > 0) {
+// 			text += '|';
+// 		}
+// 		text += `${Object.keys(term)[0]}s?`;
+// 		return text;
+// 	}, ''), 'i');
+// }
+
 /*
 
 top level object
