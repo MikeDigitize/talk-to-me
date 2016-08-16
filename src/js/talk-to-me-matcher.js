@@ -9,13 +9,13 @@ const resultMatcher = function(evt) {
 };
 
 const createSearchObject = function(searches, search) {
-	let searchResults = {};
-	searchResults.term = search;
-	searchResults.results = [];
-	searchResults.callback = searches[search];
-	searchResults.callbackUsed = false;
-	searchResults.regex = new RegExp(`${search}`, 'i');
-	return searchResults;
+	return {
+		term : search,
+		results : [],
+		callback : searches[search],
+		callbackUsed : false,
+		regex : new RegExp(`${search}`, 'i')
+	};
 };
 
 const addToSearch = function() {
@@ -41,22 +41,27 @@ const findMatches = function(evt) {
 		findMatch.call(this, evt);
 	}
 	else {
-		this.off('result', onResultCallback);
-		this.on('result', onResultCallback);	
-		hasFoundMatch = false;
-		// empty results array from each
-		return;
+		this.off('result', onResultCallback);	
+		emptyResults.call(this);
+		this.on('result', onResultCallback);		
+		return;	
 	}
 
-	if(isFinalResult && !hasFoundMatch) {
-		this.noMatchFound();
+	if(isFinalResult) {
+		if(!hasFoundMatch) {
+			this.noMatchFound();
+		}
 	}
 
 };
 
-const findMatch = function(evt) {
+const emptyResults = function() {
+	Object.keys(this.searchForThese).forEach(key => { 
+		this.searchForThese[key].results = [];
+	});
+}
 
-	let noOfTermsToSearchFor = this.searchForThese.length;
+const findMatch = function(evt) {
 	
 	this.searchForThese = Object.assign({}, searchText.call(this, evt));
 
@@ -65,10 +70,18 @@ const findMatch = function(evt) {
 		let { results, callbackUsed } = this.searchForThese[key];
 
 		if(results.length && !callbackUsed) {
+
 			let { term, results } = this.searchForThese[key];
-			this.searchForThese[key].callback.call(this, { term, results, isFinalResult : evt.isFinalResult });
+
+			this.searchForThese[key].callback.call(this, { 
+				term, 
+				results, 
+				isFinalResult : evt.isFinalResult 
+			});
+
 			this.searchForThese[key].callbackUsed = true;
 			hasFoundMatch = true;
+
 		}
 
 	});

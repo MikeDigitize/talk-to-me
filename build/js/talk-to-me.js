@@ -312,13 +312,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var createSearchObject = function createSearchObject(searches, search) {
-		var searchResults = {};
-		searchResults.term = search;
-		searchResults.results = [];
-		searchResults.callback = searches[search];
-		searchResults.callbackUsed = false;
-		searchResults.regex = new RegExp('' + search, 'i');
-		return searchResults;
+		return {
+			term: search,
+			results: [],
+			callback: searches[search],
+			callbackUsed: false,
+			regex: new RegExp('' + search, 'i')
+		};
 	};
 
 	var addToSearch = function addToSearch() {
@@ -344,37 +344,50 @@ return /******/ (function(modules) { // webpackBootstrap
 			findMatch.call(this, evt);
 		} else {
 			this.off('result', onResultCallback);
+			emptyResults.call(this);
 			this.on('result', onResultCallback);
-			hasFoundMatch = false;
-			// empty results array from each
 			return;
 		}
 
-		if (isFinalResult && !hasFoundMatch) {
-			this.noMatchFound();
+		if (isFinalResult) {
+			if (!hasFoundMatch) {
+				this.noMatchFound();
+			}
 		}
 	};
 
-	var findMatch = function findMatch(evt) {
+	var emptyResults = function emptyResults() {
 		var _this = this;
 
-		var noOfTermsToSearchFor = this.searchForThese.length;
+		Object.keys(this.searchForThese).forEach(function (key) {
+			_this.searchForThese[key].results = [];
+		});
+	};
+
+	var findMatch = function findMatch(evt) {
+		var _this2 = this;
 
 		this.searchForThese = Object.assign({}, searchText.call(this, evt));
 
 		Object.keys(this.searchForThese).forEach(function (key) {
-			var _searchForThese$key = _this.searchForThese[key];
+			var _searchForThese$key = _this2.searchForThese[key];
 			var results = _searchForThese$key.results;
 			var callbackUsed = _searchForThese$key.callbackUsed;
 
 
 			if (results.length && !callbackUsed) {
-				var _searchForThese$key2 = _this.searchForThese[key];
+				var _searchForThese$key2 = _this2.searchForThese[key];
 				var term = _searchForThese$key2.term;
 				var _results = _searchForThese$key2.results;
 
-				_this.searchForThese[key].callback.call(_this, { term: term, results: _results, isFinalResult: evt.isFinalResult });
-				_this.searchForThese[key].callbackUsed = true;
+
+				_this2.searchForThese[key].callback.call(_this2, {
+					term: term,
+					results: _results,
+					isFinalResult: evt.isFinalResult
+				});
+
+				_this2.searchForThese[key].callbackUsed = true;
 				hasFoundMatch = true;
 			}
 		});
