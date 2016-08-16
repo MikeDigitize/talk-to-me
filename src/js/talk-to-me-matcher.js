@@ -32,6 +32,8 @@ const addToSearch = function() {
 
 const findMatches = function(evt) {
 
+	console.log('find matches', hasFoundMatch);
+
 	let { results, isFinalResult } = evt;
 
 	if(!hasFoundMatch) {
@@ -40,12 +42,6 @@ const findMatches = function(evt) {
 	else if(!this.getFirstMatchOnly) {
 		findMatch.call(this, evt);
 	}
-	else {
-		this.off('result', onResultCallback);	
-		emptyResults.call(this);
-		this.on('result', onResultCallback);		
-		return;	
-	}
 
 	if(isFinalResult) {
 		if(!hasFoundMatch) {
@@ -53,12 +49,25 @@ const findMatches = function(evt) {
 		}
 	}
 
+	if(hasFoundMatch && this.getFirstMatchOnly) {
+		this.off('result', onResultCallback);	
+		this.searchForThese = emptyResults.call(this);
+		hasFoundMatch = false;	
+		this.on('result', onResultCallback);				
+	}	
+
 };
 
 const emptyResults = function() {
-	Object.keys(this.searchForThese).forEach(key => { 
-		this.searchForThese[key].results = [];
-	});
+
+	return Object.keys(this.searchForThese).reduce((searchForThese, key) => {
+		searchForThese[key] = Object.assign({}, this.searchForThese[key], {
+			results : [],
+			callbackUsed : false
+		});
+		return searchForThese;
+	}, {});
+
 }
 
 const findMatch = function(evt) {

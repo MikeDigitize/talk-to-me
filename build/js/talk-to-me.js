@@ -334,6 +334,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var findMatches = function findMatches(evt) {
+
+		console.log('find matches', hasFoundMatch);
+
 		var results = evt.results;
 		var isFinalResult = evt.isFinalResult;
 
@@ -342,11 +345,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			findMatch.call(this, evt);
 		} else if (!this.getFirstMatchOnly) {
 			findMatch.call(this, evt);
-		} else {
-			this.off('result', onResultCallback);
-			emptyResults.call(this);
-			this.on('result', onResultCallback);
-			return;
 		}
 
 		if (isFinalResult) {
@@ -354,14 +352,25 @@ return /******/ (function(modules) { // webpackBootstrap
 				this.noMatchFound();
 			}
 		}
+
+		if (hasFoundMatch && this.getFirstMatchOnly) {
+			this.off('result', onResultCallback);
+			this.searchForThese = emptyResults.call(this);
+			hasFoundMatch = false;
+			this.on('result', onResultCallback);
+		}
 	};
 
 	var emptyResults = function emptyResults() {
 		var _this = this;
 
-		Object.keys(this.searchForThese).forEach(function (key) {
-			_this.searchForThese[key].results = [];
-		});
+		return Object.keys(this.searchForThese).reduce(function (searchForThese, key) {
+			searchForThese[key] = Object.assign({}, _this.searchForThese[key], {
+				results: [],
+				callbackUsed: false
+			});
+			return searchForThese;
+		}, {});
 	};
 
 	var findMatch = function findMatch(evt) {
