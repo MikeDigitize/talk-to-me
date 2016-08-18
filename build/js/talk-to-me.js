@@ -94,11 +94,13 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	};
 
-	var addDefaultEvents = function addDefaultEvents(listeners, speech) {
-		Object.keys(listeners).forEach(function (listener) {
-			var handler = listeners[listener][0];
+	var addDefaultEvents = function addDefaultEvents() {
+		var _this = this;
+
+		Object.keys(this.eventListeners).forEach(function (listener) {
+			var handler = _this.eventListeners[listener][0];
 			if (handler) {
-				speech.addEventListener(listener, handler);
+				_this.speech.addEventListener(listener, handler);
 			}
 		});
 	};
@@ -129,47 +131,47 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			_classCallCheck(this, TalkToMe);
 
-			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(TalkToMe).call(this));
+			var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(TalkToMe).call(this));
 
 			var _TalkToMe$getSpeechRe = TalkToMe.getSpeechRecogniserConstructor();
 
 			var speech = _TalkToMe$getSpeechRe.speech;
 			var support = _TalkToMe$getSpeechRe.support;
 
-			_this.support = support;
+			_this2.support = support;
 
-			if (_this.support) {
+			if (_this2.support) {
 				var numOfAlternativeMatches = options.numOfAlternativeMatches;
 				var language = options.language;
 				var finalResultsOnly = options.finalResultsOnly;
 
 				finalResultsOnly = typeof finalResultsOnly === 'undefined' ? true : !finalResultsOnly;
-				_this.speech = new speech();
-				_this.speech.maxAlternatives = numOfAlternativeMatches || 5;
-				_this.speech.interimResults = finalResultsOnly;
-				_this.speech.lang = language || 'en-US';
-				_this.isListening = false;
-				_this.autoRestart = false;
-				_this.getFirstMatchOnly = true;
+				_this2.speech = new speech();
+				_this2.speech.maxAlternatives = numOfAlternativeMatches || 5;
+				_this2.speech.interimResults = finalResultsOnly;
+				_this2.speech.lang = language || 'en-US';
+				_this2.isListening = false;
+				_this2.autoRestart = false;
+				_this2.getFirstMatchOnly = true;
 
-				_this.eventListeners = {
+				_this2.eventListeners = {
 					start: [],
-					end: [onEnd.bind(_this)],
+					end: [onEnd.bind(_this2)],
 					audioend: [],
 					audiostart: [],
-					error: [onError.bind(_this)],
+					error: [onError.bind(_this2)],
 					nomatch: [],
-					result: [onResult.bind(_this)],
+					result: [onResult.bind(_this2)],
 					soundend: [],
 					soundstart: [],
 					speechend: [],
 					speechstart: []
 				};
 
-				addDefaultEvents(_this.eventListeners, _this.speech);
+				addDefaultEvents.call(_this2);
 			}
 
-			return _this;
+			return _this2;
 		}
 
 		_createClass(TalkToMe, [{
@@ -179,7 +181,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				if (!this.support) {
 					cb();
+					return true;
 				}
+				return false;
 			}
 		}, {
 			key: 'start',
@@ -245,6 +249,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			key: 'throwWarning',
 			value: function throwWarning(msg) {
 				console.warn(msg);
+				return true;
 			}
 		}], [{
 			key: 'getSpeechRecogniserConstructor',
@@ -306,7 +311,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	var onResultCallback = void 0;
 
 	var resultMatcher = function resultMatcher(evt) {
-		if (this.support && Object.keys(this.searchForThese).length) {
+
+		if (hasFoundMatch && this.getFirstMatchOnly) {
+
+			this.off('result', onResultCallback);
+			this.searchForThese = emptyResults.call(this);
+			hasFoundMatch = false;
+			onResultCallback = resultMatcher.bind(this);
+			this.on('result', onResultCallback);
+		} else {
 			findMatches.call(this, evt);
 		}
 	};
@@ -334,9 +347,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var findMatches = function findMatches(evt) {
-
-		console.log('find matches', hasFoundMatch);
-
 		var results = evt.results;
 		var isFinalResult = evt.isFinalResult;
 
@@ -352,55 +362,42 @@ return /******/ (function(modules) { // webpackBootstrap
 				this.noMatchFound();
 			}
 		}
-
-		if (hasFoundMatch && this.getFirstMatchOnly) {
-			this.off('result', onResultCallback);
-			this.searchForThese = emptyResults.call(this);
-			hasFoundMatch = false;
-			this.on('result', onResultCallback);
-		}
-	};
-
-	var emptyResults = function emptyResults() {
-		var _this = this;
-
-		return Object.keys(this.searchForThese).reduce(function (searchForThese, key) {
-			searchForThese[key] = Object.assign({}, _this.searchForThese[key], {
-				results: [],
-				callbackUsed: false
-			});
-			return searchForThese;
-		}, {});
 	};
 
 	var findMatch = function findMatch(evt) {
-		var _this2 = this;
 
 		this.searchForThese = Object.assign({}, searchText.call(this, evt));
+		fireResults.call(this, evt.isFinalResult);
+	};
+
+	var fireResults = function fireResults(isFinalResult) {
+		var _this = this;
 
 		Object.keys(this.searchForThese).forEach(function (key) {
-			var _searchForThese$key = _this2.searchForThese[key];
+			var _searchForThese$key = _this.searchForThese[key];
 			var results = _searchForThese$key.results;
 			var callbackUsed = _searchForThese$key.callbackUsed;
 
 
 			if (results.length && !callbackUsed) {
-				var _searchForThese$key2 = _this2.searchForThese[key];
+				var _searchForThese$key2 = _this.searchForThese[key];
 				var term = _searchForThese$key2.term;
 				var _results = _searchForThese$key2.results;
 
 
-				_this2.searchForThese[key].callback.call(_this2, {
+				_this.searchForThese[key].callback.call(_this, {
 					term: term,
 					results: _results,
-					isFinalResult: evt.isFinalResult
+					isFinalResult: isFinalResult
 				});
 
-				_this2.searchForThese[key].callbackUsed = true;
-				hasFoundMatch = true;
+				_this.searchForThese[key].callbackUsed = true;
 			}
 		});
 	};
+
+	// loops through each search term and each result and looks for matches
+	// if it finds them it adds the match to the results array stored against each object
 
 	var searchText = function searchText(evt) {
 
@@ -414,11 +411,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				if (match.length) {
 					results[key].results.push(match[0]);
+					hasFoundMatch = true;
 				}
 			}
 
 			return results;
 		}, this.searchForThese);
+	};
+
+	var emptyResults = function emptyResults() {
+		var _this2 = this;
+
+		return Object.keys(this.searchForThese).reduce(function (searchForThese, key) {
+			searchForThese[key] = Object.assign({}, _this2.searchForThese[key], {
+				results: [],
+				callbackUsed: false
+			});
+			return searchForThese;
+		}, {});
 	};
 
 	var noMatch = function noMatch() {
@@ -464,13 +474,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				if (this.support) {
 					this.noMatchFound = callback.bind(this);
+					return true;
 				}
-				return true;
+				return false;
 			}
 		}, {
 			key: 'removeMatchTerm',
 			value: function removeMatchTerm(term) {
-				delete this.searchForThese[term];
+				if (this.support) {
+					return delete this.searchForThese[term];
+				}
+				return false;
 			}
 		}]);
 

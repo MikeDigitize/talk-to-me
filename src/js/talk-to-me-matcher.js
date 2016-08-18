@@ -3,9 +3,20 @@ let createSearches;
 let onResultCallback;
 
 const resultMatcher = function(evt) {
-	if(this.support && Object.keys(this.searchForThese).length) {
+
+	if(hasFoundMatch && this.getFirstMatchOnly) {
+
+		this.off('result', onResultCallback);	
+		this.searchForThese = emptyResults.call(this);
+		hasFoundMatch = false;	
+		onResultCallback = resultMatcher.bind(this);
+		this.on('result', onResultCallback);
+
+	}	
+	else  {
 		findMatches.call(this, evt);
-	}
+	}	
+	
 };
 
 const createSearchObject = function(searches, search) {
@@ -32,8 +43,6 @@ const addToSearch = function() {
 
 const findMatches = function(evt) {
 
-	console.log('find matches', hasFoundMatch);
-
 	let { results, isFinalResult } = evt;
 
 	if(!hasFoundMatch) {
@@ -49,30 +58,16 @@ const findMatches = function(evt) {
 		}
 	}
 
-	if(hasFoundMatch && this.getFirstMatchOnly) {
-		this.off('result', onResultCallback);	
-		this.searchForThese = emptyResults.call(this);
-		hasFoundMatch = false;	
-		this.on('result', onResultCallback);				
-	}	
-
 };
-
-const emptyResults = function() {
-
-	return Object.keys(this.searchForThese).reduce((searchForThese, key) => {
-		searchForThese[key] = Object.assign({}, this.searchForThese[key], {
-			results : [],
-			callbackUsed : false
-		});
-		return searchForThese;
-	}, {});
-
-}
 
 const findMatch = function(evt) {
 	
 	this.searchForThese = Object.assign({}, searchText.call(this, evt));
+	fireResults.call(this, evt.isFinalResult);	
+
+};
+
+const fireResults = function(isFinalResult) {
 
 	Object.keys(this.searchForThese).forEach(key => {
 
@@ -85,17 +80,19 @@ const findMatch = function(evt) {
 			this.searchForThese[key].callback.call(this, { 
 				term, 
 				results, 
-				isFinalResult : evt.isFinalResult 
+				isFinalResult
 			});
 
 			this.searchForThese[key].callbackUsed = true;
-			hasFoundMatch = true;
 
 		}
 
 	});
 
 }
+
+// loops through each search term and each result and looks for matches
+// if it finds them it adds the match to the results array stored against each object
 
 const searchText = function(evt) {
 
@@ -109,6 +106,7 @@ const searchText = function(evt) {
 
 			if(match.length) {
 				results[key].results.push(match[0]);
+				hasFoundMatch = true;
 			}
 
 		}	
@@ -116,6 +114,18 @@ const searchText = function(evt) {
 		return results;
 
 	}, this.searchForThese);
+
+};
+
+const emptyResults = function() {
+
+	return Object.keys(this.searchForThese).reduce((searchForThese, key) => {
+		searchForThese[key] = Object.assign({}, this.searchForThese[key], {
+			results : [],
+			callbackUsed : false
+		});
+		return searchForThese;
+	}, {});
 
 };
 
@@ -153,12 +163,16 @@ export class Matcher {
 	onNoMatch(callback = noMatch) {
 		if(this.support) {
 			this.noMatchFound = callback.bind(this);
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	removeMatchTerm(term) {
-		delete this.searchForThese[term];
+		if(this.support) {
+			return delete this.searchForThese[term];	
+		}
+		return false;
 	}
 
 }

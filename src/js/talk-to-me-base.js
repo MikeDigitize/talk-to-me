@@ -19,12 +19,12 @@ const onEnd = function() {
 	}
 };
 
-const addDefaultEvents = function(listeners, speech) {
-	Object.keys(listeners)
+const addDefaultEvents = function() {
+	Object.keys(this.eventListeners)
 		.forEach(listener => {
-			let handler = listeners[listener][0];
+			let handler = this.eventListeners[listener][0];
 			if(handler) {
-				speech.addEventListener(listener, handler);
+				this.speech.addEventListener(listener, handler);
 			}			
 		});
 }
@@ -83,7 +83,7 @@ export class TalkToMe extends Combine(Matcher, Conversate) {
 				speechstart : []
 			}
 			
-			addDefaultEvents(this.eventListeners, this.speech);
+			addDefaultEvents.call(this);
 
 		}
 
@@ -92,7 +92,9 @@ export class TalkToMe extends Combine(Matcher, Conversate) {
 	onNoSupport(cb = defaultNoSupportFunction) {
 		if(!this.support) {
 			cb();
+			return true;
 		}		
+		return false;
 	}
 
 	start() {
@@ -158,6 +160,7 @@ export class TalkToMe extends Combine(Matcher, Conversate) {
 
 	throwWarning(msg) {
 		console.warn(msg);	
+		return true;
 	}
 
 	static getSpeechRecogniserConstructor() {
