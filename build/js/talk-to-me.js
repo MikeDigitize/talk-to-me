@@ -71,10 +71,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 	var defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
 	var nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
 	var eventListenerNotFoundError = 'Sorry the listener you\'re trying to remove isn\'t currently active';
@@ -106,10 +102,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	var onError = function onError(e) {
-		if (e.error === 'no-speech') {
-			console.warn(noSpeechDetected);
-		} else {
-			this.throwWarning(e.error);
+		if (this.isListening) {
+			if (e.error === 'no-speech') {
+				console.warn(noSpeechDetected);
+			} else {
+				this.throwWarning(e.error);
+			}
 		}
 	};
 
@@ -123,55 +121,51 @@ return /******/ (function(modules) { // webpackBootstrap
 		});
 	};
 
-	var TalkToMe = exports.TalkToMe = function (_Combine) {
-		_inherits(TalkToMe, _Combine);
-
+	var TalkToMe = exports.TalkToMe = function () {
 		function TalkToMe() {
 			var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 			_classCallCheck(this, TalkToMe);
-
-			var _this2 = _possibleConstructorReturn(this, Object.getPrototypeOf(TalkToMe).call(this));
 
 			var _TalkToMe$getSpeechRe = TalkToMe.getSpeechRecogniserConstructor();
 
 			var speech = _TalkToMe$getSpeechRe.speech;
 			var support = _TalkToMe$getSpeechRe.support;
 
-			_this2.support = support;
+			this.support = support;
 
-			if (_this2.support) {
+			if (this.support) {
 				var numOfAlternativeMatches = options.numOfAlternativeMatches;
 				var language = options.language;
 				var finalResultsOnly = options.finalResultsOnly;
 
 				finalResultsOnly = typeof finalResultsOnly === 'undefined' ? true : !finalResultsOnly;
-				_this2.speech = new speech();
-				_this2.speech.maxAlternatives = numOfAlternativeMatches || 5;
-				_this2.speech.interimResults = finalResultsOnly;
-				_this2.speech.lang = language || 'en-US';
-				_this2.isListening = false;
-				_this2.autoRestart = false;
-				_this2.getFirstMatchOnly = true;
+				this.speech = new speech();
+				this.speech.maxAlternatives = numOfAlternativeMatches || 5;
+				this.speech.interimResults = finalResultsOnly;
+				this.speech.lang = language || 'en-US';
+				this.isListening = false;
+				this.autoRestart = false;
+				this.getFirstMatchOnly = true;
 
-				_this2.eventListeners = {
+				this.eventListeners = {
 					start: [],
-					end: [onEnd.bind(_this2)],
+					end: [onEnd.bind(this)],
 					audioend: [],
 					audiostart: [],
-					error: [onError.bind(_this2)],
+					error: [onError.bind(this)],
 					nomatch: [],
-					result: [onResult.bind(_this2)],
+					result: [onResult.bind(this)],
 					soundend: [],
 					soundstart: [],
 					speechend: [],
 					speechstart: []
 				};
 
-				addDefaultEvents.call(_this2);
+				addDefaultEvents.call(this);
+			} else {
+				this.throwWarning('Sorry, no speech recognition ability found in this browser.');
 			}
-
-			return _this2;
 		}
 
 		_createClass(TalkToMe, [{
@@ -218,7 +212,6 @@ return /******/ (function(modules) { // webpackBootstrap
 							this.speech.addEventListener(evt, callback.bind(this.speech));
 						}
 						this.eventListeners[evt].push(callback);
-						return true;
 					} else {
 						this.throwWarning(nonCompatibleSpeechRecognitionEventError);
 						return false;
@@ -234,15 +227,17 @@ return /******/ (function(modules) { // webpackBootstrap
 						if (indexOfCallback > -1) {
 							this.speech.removeEventListener(evt, callback);
 							this.eventListeners[evt].splice(indexOfCallback, 1);
-							return true;
 						} else {
 							this.throwWarning(eventListenerNotFoundError);
-							return false;
 						}
 					} else {
 						throwWarning(nonCompatibleSpeechRecognitionEventError);
 						return false;
 					}
+					if (this.eventListeners.result.length === 1) {
+						this.isListening = false;
+					}
+					return true;
 				}
 			}
 		}, {
@@ -260,7 +255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}]);
 
 		return TalkToMe;
-	}((0, _combine.Combine)(_talkToMeMatcher.Matcher, _talkToMeConversate.Conversate));
+	}();
 
 /***/ },
 /* 1 */

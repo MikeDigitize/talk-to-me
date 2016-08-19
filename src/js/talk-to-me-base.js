@@ -30,12 +30,14 @@ const addDefaultEvents = function() {
 }
 
 const onError = function(e) {
-	if(e.error === 'no-speech') {
-		console.warn(noSpeechDetected);
-	}
-	else {
-		this.throwWarning(e.error);
-	}
+	if(this.isListening) {
+		if(e.error === 'no-speech') {
+			console.warn(noSpeechDetected);
+		}
+		else {
+			this.throwWarning(e.error);
+		}	
+	}	
 }
 
 const onResult = function(event) {
@@ -48,11 +50,9 @@ const onResult = function(event) {
 	});
 }
 
-export class TalkToMe extends Combine(Matcher, Conversate) {
+export class TalkToMe {
 
 	constructor(options = {}) {
-
-		super();
 
 		let { speech, support } = TalkToMe.getSpeechRecogniserConstructor();
 		this.support = support;
@@ -85,6 +85,9 @@ export class TalkToMe extends Combine(Matcher, Conversate) {
 			
 			addDefaultEvents.call(this);
 
+		}
+		else {
+			this.throwWarning('Sorry, no speech recognition ability found in this browser.')
 		}
 
 	}	
@@ -128,7 +131,6 @@ export class TalkToMe extends Combine(Matcher, Conversate) {
 					this.speech.addEventListener(evt, callback.bind(this.speech));
 				}				
 				this.eventListeners[evt].push(callback);
-				return true;
 			}
 			else {
 				this.throwWarning(nonCompatibleSpeechRecognitionEventError);
@@ -144,17 +146,19 @@ export class TalkToMe extends Combine(Matcher, Conversate) {
 				if(indexOfCallback > -1) {
 					this.speech.removeEventListener(evt, callback);
 					this.eventListeners[evt].splice(indexOfCallback, 1);
-					return true;
 				}	
 				else {
 					this.throwWarning(eventListenerNotFoundError);
-					return false;
 				}			
 			}
 			else {
 				throwWarning(nonCompatibleSpeechRecognitionEventError);
 				return false;
 			}
+			if(this.eventListeners.result.length === 1) {
+				this.isListening = false;
+			}
+			return true;
 		}
 	}
 
