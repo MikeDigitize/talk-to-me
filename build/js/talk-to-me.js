@@ -311,16 +311,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	var onResultCallback = void 0;
 
 	var resultMatcher = function resultMatcher(evt) {
+		var isFinalResult = evt.isFinalResult;
 
-		if (hasFoundMatch && this.getFirstMatchOnly) {
 
-			this.off('result', onResultCallback);
+		if (!hasFoundMatch || !this.getFirstMatchOnly) {
+			findMatches.call(this, evt);
+		} else if (isFinalResult) {
 			this.searchForThese = emptyResults.call(this);
 			hasFoundMatch = false;
-			onResultCallback = resultMatcher.bind(this);
 			this.on('result', onResultCallback);
-		} else {
-			findMatches.call(this, evt);
 		}
 	};
 

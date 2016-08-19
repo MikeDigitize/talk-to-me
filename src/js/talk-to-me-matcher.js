@@ -4,18 +4,16 @@ let onResultCallback;
 
 const resultMatcher = function(evt) {
 
-	if(hasFoundMatch && this.getFirstMatchOnly) {
+	let { isFinalResult } = evt;
 
-		this.off('result', onResultCallback);	
-		this.searchForThese = emptyResults.call(this);
-		hasFoundMatch = false;	
-		onResultCallback = resultMatcher.bind(this);
-		this.on('result', onResultCallback);
-
-	}	
-	else  {
+	if (!hasFoundMatch || !this.getFirstMatchOnly) {
 		findMatches.call(this, evt);
 	}	
+	else if(isFinalResult) {
+		this.searchForThese = emptyResults.call(this);	
+		hasFoundMatch = false;
+		this.on('result', onResultCallback);
+	}
 	
 };
 
