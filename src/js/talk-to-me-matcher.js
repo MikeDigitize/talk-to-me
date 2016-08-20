@@ -9,15 +9,23 @@ const resultMatcher = function(evt) {
 	if (!hasFoundMatch || !this.getFirstMatchOnly) {
 		findMatches.call(this, evt);
 	}	
-	else if(isFinalResult) {
-		this.searchForThese = emptyResults.call(this);	
-		hasFoundMatch = false;
-		this.on('result', onResultCallback);
+	else if(hasFoundMatch) {
+		resetFindMatches.call(this);
 	}
 	
 };
 
+const resetFindMatches = function() {
+
+	this.off('result', onResultCallback);
+	this.searchForThese = emptyResults.call(this);	
+	hasFoundMatch = false;
+	this.on('result', onResultCallback);	
+
+};
+
 const createSearchObject = function(searches, search) {
+
 	return {
 		term : search,
 		results : [],
@@ -25,9 +33,11 @@ const createSearchObject = function(searches, search) {
 		callbackUsed : false,
 		regex : new RegExp(`${search}`, 'i')
 	};
+
 };
 
 const addToSearch = function() {
+
 	let records = {};
 	return searches => {
 		Object.keys(searches).forEach(search => {
@@ -37,6 +47,7 @@ const addToSearch = function() {
 		});		
 		return records;
 	}
+
 }
 
 const findMatches = function(evt) {
@@ -51,9 +62,12 @@ const findMatches = function(evt) {
 	}
 
 	if(isFinalResult) {
-		if(!hasFoundMatch) {
-			this.noMatchFound();
+		if(hasFoundMatch) {
+			resetFindMatches.call(this);
 		}
+		else {
+			this.noMatchFound();
+		}		
 	}
 
 };
@@ -62,6 +76,25 @@ const findMatch = function(evt) {
 	
 	this.searchForThese = Object.assign({}, searchText.call(this, evt));
 	fireResults.call(this, evt.isFinalResult);	
+
+};
+
+const searchText = function(evt) {
+
+	return Object.keys(this.searchForThese).reduce((results, key) => {
+
+		let match = evt.results.filter(result => {
+			return result.transcript.match(results[key].regex);
+		});
+
+		if(match.length) {
+			results[key].results = results[key].results.concat(match[0]);
+			hasFoundMatch = true;
+		}	
+
+		return results;
+
+	}, this.searchForThese);
 
 };
 
@@ -89,40 +122,17 @@ const fireResults = function(isFinalResult) {
 
 }
 
-// loops through each search term and each result and looks for matches
-// if it finds them it adds the match to the results array stored against each object
-
-const searchText = function(evt) {
-
-	return Object.keys(this.searchForThese).reduce((results, key) => {
-
-		if(!results[key].results.length) {
-
-			let match = evt.results.filter(result => {
-				return result.transcript.match(results[key].regex);
-			});
-
-			if(match.length) {
-				results[key].results.push(match[0]);
-				hasFoundMatch = true;
-			}
-
-		}	
-
-		return results;
-
-	}, this.searchForThese);
-
-};
-
 const emptyResults = function() {
 
 	return Object.keys(this.searchForThese).reduce((searchForThese, key) => {
+
 		searchForThese[key] = Object.assign({}, this.searchForThese[key], {
 			results : [],
 			callbackUsed : false
 		});
+
 		return searchForThese;
+
 	}, {});
 
 };
@@ -134,43 +144,30 @@ const noMatch = function() {
 export class Matcher {
 
 	match(searches = {}) {
-		if(this.support) {
-
-			if(typeof searches !== 'object' || !Object.keys(searches).length){
-				this.throwWarning('match expects an object with a key term and a callback value.');
-				return;
-			}
-
-			if(!this.searchForThese) {
-				createSearches = addToSearch();
-				onResultCallback = resultMatcher.bind(this);
-				this.on('result', onResultCallback);
-			}
-			
-			this.searchForThese = createSearches(searches);
-			
-			if(!this.noMatchFound) {
-				this.onNoMatch();
-			}	
-
-			return true;		
-
+		if(typeof searches !== 'object' || !Object.keys(searches).length){
+			this.throwWarning('match expects an object with a key term and a callback value.');
+			return;
 		}
+
+		if(!this.searchForThese) {
+			createSearches = addToSearch();
+			onResultCallback = resultMatcher.bind(this);
+			this.on('result', onResultCallback);
+		}
+		
+		this.searchForThese = createSearches(searches);
+		
+		if(!this.noMatchFound) {
+			this.onNoMatch();
+		}	
 	}
 
 	onNoMatch(callback = noMatch) {
-		if(this.support) {
-			this.noMatchFound = callback.bind(this);
-			return true;
-		}
-		return false;
+		this.noMatchFound = callback.bind(this);
 	}
 
 	removeMatchTerm(term) {
-		if(this.support) {
-			return delete this.searchForThese[term];	
-		}
-		return false;
+		delete this.searchForThese[term];	
 	}
 
 }

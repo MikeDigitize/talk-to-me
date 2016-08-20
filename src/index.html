@@ -18,7 +18,7 @@
 		'washing machines' : callback
 	}
 	var ttm = new TalkToMe();
-	ttm.on('result', callback);
+	ttm.match(listenFor);
 	ttm.autoRestart = true;
 	ttm.start();
 </script>
