@@ -1,5 +1,7 @@
 # Talk to me
 
+* Note this is still under development. Don't use it yet!
+
 Talk to me is a wrapper around the speech recognition API. There's a base class which provides just the basics in functionality and extensions to the base class which can be combined to create custom builds.
 
 ### Usage
