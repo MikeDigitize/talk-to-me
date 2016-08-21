@@ -15,15 +15,14 @@
 		'washing machines' : callback
 	};
 	var listenForTheseToo = {
-		'yo mama' : function(result) {
-			console.log('yo mama is so....', result);
+		'hello there my friend' : function(result) {
+			console.log('hello there my friend how are you....', result);
 		}
 	};
 	var ttm = new TalkToMe();
 	ttm.match(listenFor);
 	ttm.match(listenForTheseToo);
 	ttm.autoRestart = true;
-	ttm.start();
 	ttm.start();
 </script>
 </body>
