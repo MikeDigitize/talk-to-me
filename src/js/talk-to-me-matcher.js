@@ -140,15 +140,14 @@ const emptyResults = function() {
 };
 
 const noMatch = function() {
-	this.throwWarning('Sorry no matches found, try again?');
+	return this.throwWarning('Sorry no matches found, try again?');
 }; 
 
 export class Matcher {
 
 	match(searches = {}) {
 		if(typeof searches !== 'object' || !Object.keys(searches).length){
-			this.throwWarning('match expects an object with a key term and a callback value.');
-			return;
+			return this.throwWarning('match expects an object with a key term and a callback value.');
 		}
 
 		if(!this.searchForThese) {

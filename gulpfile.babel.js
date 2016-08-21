@@ -23,22 +23,19 @@ let htmlDest = './build';
 let testConfigSrc = __dirname + '/src/tests/karma.config.js';
 let testSource = './src/tests/**/*.js';
 
-let jsNames = { base : 'talk-to-me.js', entry :  'js/talk-to-me-base.js' }; 
-
-let karmaServer = (configSrc, browsers, done) => new Server({
+let karmaServer = (configSrc, browsers, done) => 
+    new Server({
         configFile: configSrc,
         singleRun: true,
-        autoWatch: false,
+        autoWatch: true,
         browsers: browsers
-    }, () => {
-        done();
-    }).start();
+    }, () => done()).start();
 
-gulp.task('js:base', () => {
+gulp.task('js', () => {
     let entry = {};
-    entry['talk-to-me'] = jsNames.entry;
+    entry['talk-to-me'] = 'js/talk-to-me-base.js';
     let config = Object.assign({}, webpackConfigSrc, { entry });
-    return gulp.src(`./src/${jsNames.entry}`)
+    return gulp.src('./src/js/talk-to-me-base.js')
         .pipe(plumber())
         .pipe(webpackStream(config))
         .pipe(gulp.dest(jsDest));
@@ -49,15 +46,14 @@ gulp.task('html', () => {
         .pipe(gulp.dest(htmlDest));
 });
 
-gulp.task('karma:browser-tests', done => {
+gulp.task('test', done => {
     return karmaServer(testConfigSrc, ['Chrome'], done);
 });
 
 gulp.task('watch', function() {
     gulp.watch(htmlSource, ['html']);
-    gulp.watch(talkToMeSource, ['js:base']);
-    gulp.watch(testConfigSrc, ['karma:browser-tests']);
+    gulp.watch(talkToMeSource, ['js']);
+    gulp.watch(testSource, ['test']);
 });
 
-gulp.task('default', ['html', 'js:base', 'watch']);
-gulp.task('base', ['html', 'js:base']);
+gulp.task('default', ['html', 'js', 'test', 'watch']);

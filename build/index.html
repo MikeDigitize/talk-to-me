@@ -13,12 +13,18 @@
 	var listenFor = {
 		'show' : callback,
 		'washing machines' : callback
-	}
+	};
+	var listenForTheseToo = {
+		'yo mama' : function(result) {
+			console.log('yo mama is so....', result);
+		}
+	};
 	var ttm = new TalkToMe();
-	console.log(ttm.eventListeners);
-	// ttm.match(listenFor);
-	// ttm.autoRestart = true;
-	// ttm.start();
+	ttm.match(listenFor);
+	ttm.match(listenForTheseToo);
+	ttm.autoRestart = true;
+	ttm.start();
+	ttm.start();
 </script>
 </body>
 </html>

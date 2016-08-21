@@ -125,7 +125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (e.error === 'no-speech') {
 				console.warn(noSpeechDetected);
 			} else {
-				this.throwWarning(e.error);
+				return this.throwWarning(e.error);
 			}
 		}
 	};
@@ -138,11 +138,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *	which is bound so its context is the current instance of Talk To Me
 	 */
 	
-	var onResult = function onResult(event) {
+	var onResult = function onResult(evt) {
 		var _this2 = this;
 	
-		var isFinalResult = event.results[0].isFinal;
-		var results = [].slice.call(event.results[0]);
+		var isFinalResult = evt.results[0].isFinal;
+		var results = [].slice.call(evt.results[0]);
 	
 		this.eventListeners.result.forEach(function (listener, i) {
 			if (i !== 0 && _this2.isListening) {
@@ -213,7 +213,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 				addEventListeners.call(_this3);
 			} else {
-				_this3.throwWarning('Sorry, no speech recognition ability found in this browser.');
+				var _ret;
+	
+				return _ret = _this3.throwWarning('Sorry, no speech recognition ability found in this browser.'), _possibleConstructorReturn(_this3, _ret);
 			}
 	
 			return _this3;
@@ -232,8 +234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 			/*
 	   *	Try / catch will prevent errors thrown if start is called when the
-	   *	speech recognition API has already started to listen.
-	   *	Likewise for stop (see below method)
+	   *	speech recognition API has already started to listen
 	   */
 	
 		}, {
@@ -242,19 +243,16 @@ return /******/ (function(modules) { // webpackBootstrap
 				this.isListening = true;
 				try {
 					this.speech.start();
+					return true;
 				} catch (e) {
-					this.throwWarning(e);
+					return this.throwWarning(e);
 				}
 			}
 		}, {
 			key: 'stop',
 			value: function stop() {
 				this.isListening = false;
-				try {
-					this.speech.abort();
-				} catch (e) {
-					this.throwWarning(e);
-				}
+				this.speech.abort();
 			}
 	
 			/*
@@ -274,8 +272,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					}
 					this.eventListeners[evt].push({ callback: callback, boundCallback: boundCallback });
 				} else {
-					this.throwWarning(nonCompatibleSpeechRecognitionEventError);
-					return false;
+					return this.throwWarning(nonCompatibleSpeechRecognitionEventError);
 				}
 			}
 	
@@ -283,8 +280,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *	Removes event listeners from the instance of the speech recognition API 
 	   *	Matches the callback, not the bound one as externally there is no reference to it
 	   *	Then removes the bound callback counterpart event listener
+	   *
 	   *	Note: if the penultimate result event listener is removed, Talk To Me's result listener
-	   *	is also removed, a new instance of Talk To Me is created and the event listeners are re-registered
+	   *	is also removed, the instance of the speech recognition API is destroyed and a new one created 
+	   *	and the event listeners are re-registered
+	   *
+	   *	This is specifically designed for the (additional) Matcher module (it won't affect the base class)
+	   *	The Matcher module will only ever register one additional result handler 
+	   *	and consolidates all searches into a single callback. If it is set to find just the first match 
+	   *	it will fire the callback and destroy the instance of the speech recognition API 
+	   *	to prevent remaining result events from firing
 	   */
 	
 		}, {
@@ -300,10 +305,12 @@ return /******/ (function(modules) { // webpackBootstrap
 					}, -1);
 	
 					if (indexOfCallback > -1) {
-						this.speech.removeEventListener(evt, this.eventListeners[evt][indexOfCallback].boundCallback);
+						if (evt !== 'result') {
+							this.speech.removeEventListener(evt, this.eventListeners[evt][indexOfCallback].boundCallback);
+						}
 						this.eventListeners[evt].splice(indexOfCallback, 1);
 					} else {
-						this.throwWarning(eventListenerNotFoundError);
+						return this.throwWarning(eventListenerNotFoundError);
 					}
 	
 					if (evt === 'result' && this.eventListeners.result.length === 1) {
@@ -318,14 +325,14 @@ return /******/ (function(modules) { // webpackBootstrap
 						addEventListeners.call(this);
 					}
 				} else {
-					throwWarning(nonCompatibleSpeechRecognitionEventError);
-					return false;
+					return throwWarning(nonCompatibleSpeechRecognitionEventError);
 				}
 			}
 		}, {
 			key: 'throwWarning',
 			value: function throwWarning(msg) {
 				console.warn(msg);
+				return false;
 			}
 		}], [{
 			key: 'getSpeechRecogniserConstructor',
@@ -515,7 +522,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	var noMatch = function noMatch() {
-		this.throwWarning('Sorry no matches found, try again?');
+		return this.throwWarning('Sorry no matches found, try again?');
 	};
 	
 	var Matcher = exports.Matcher = function () {
@@ -529,8 +536,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				var searches = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	
 				if ((typeof searches === 'undefined' ? 'undefined' : _typeof(searches)) !== 'object' || !Object.keys(searches).length) {
-					this.throwWarning('match expects an object with a key term and a callback value.');
-					return;
+					return this.throwWarning('match expects an object with a key term and a callback value.');
 				}
 	
 				if (!this.searchForThese) {

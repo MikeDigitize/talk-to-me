@@ -54,7 +54,7 @@ const onError = function(e) {
 			console.warn(noSpeechDetected);
 		}
 		else {
-			this.throwWarning(e.error);
+			return this.throwWarning(e.error);
 		}	
 	}	
 }
@@ -68,10 +68,10 @@ const onError = function(e) {
  *	which is bound so its context is the current instance of Talk To Me
  */
 
-const onResult = function(event) {
+const onResult = function(evt) {
 
-	const isFinalResult = event.results[0].isFinal;
-	const results = [].slice.call(event.results[0]);
+	const isFinalResult = evt.results[0].isFinal;
+	const results = [].slice.call(evt.results[0]);
 
 	this.eventListeners.result.forEach((listener, i) => {
 		if(i !== 0 && this.isListening) {
@@ -133,7 +133,7 @@ export class TalkToMe extends Combine(Matcher) {
 
 		}
 		else {
-			this.throwWarning('Sorry, no speech recognition ability found in this browser.');
+			return this.throwWarning('Sorry, no speech recognition ability found in this browser.');
 		}
 
 	}	
@@ -146,28 +146,23 @@ export class TalkToMe extends Combine(Matcher) {
 
 	/*
 	 *	Try / catch will prevent errors thrown if start is called when the
-	 *	speech recognition API has already started to listen.
-	 *	Likewise for stop (see below method)
+	 *	speech recognition API has already started to listen
 	 */
 
 	start() {
 		this.isListening = true;
 		try {
 			this.speech.start();
+			return true;
 		}
 		catch(e) {
-			this.throwWarning(e);
+			return this.throwWarning(e);
 		}	
 	}
 
 	stop() {
 		this.isListening = false;
-		try {
-			this.speech.abort();
-		}
-		catch(e) {
-			this.throwWarning(e);
-		}
+		this.speech.abort();
 	}
 
 	/*
@@ -186,8 +181,7 @@ export class TalkToMe extends Combine(Matcher) {
 			this.eventListeners[evt].push({ callback, boundCallback });
 		}
 		else {
-			this.throwWarning(nonCompatibleSpeechRecognitionEventError);
-			return false;
+			return this.throwWarning(nonCompatibleSpeechRecognitionEventError);
 		}
 	}
 
@@ -195,8 +189,16 @@ export class TalkToMe extends Combine(Matcher) {
 	 *	Removes event listeners from the instance of the speech recognition API 
 	 *	Matches the callback, not the bound one as externally there is no reference to it
 	 *	Then removes the bound callback counterpart event listener
+	 *
 	 *	Note: if the penultimate result event listener is removed, Talk To Me's result listener
-	 *	is also removed, a new instance of Talk To Me is created and the event listeners are re-registered
+	 *	is also removed, the instance of the speech recognition API is destroyed and a new one created 
+	 *	and the event listeners are re-registered
+	 *
+	 *	This is specifically designed for the (additional) Matcher module (it won't affect the base class)
+	 *	The Matcher module will only ever register one additional result handler 
+	 *	and consolidates all searches into a single callback. If it is set to find just the first match 
+	 *	it will fire the callback and destroy the instance of the speech recognition API 
+	 *	to prevent remaining result events from firing
 	 */
 
 	off(evt, callback) {
@@ -210,11 +212,13 @@ export class TalkToMe extends Combine(Matcher) {
 			}, -1);
 
 			if(indexOfCallback > -1) {
-				this.speech.removeEventListener(evt, this.eventListeners[evt][indexOfCallback].boundCallback);
+				if(evt !== 'result') {
+					this.speech.removeEventListener(evt, this.eventListeners[evt][indexOfCallback].boundCallback);	
+				}				
 				this.eventListeners[evt].splice(indexOfCallback, 1);
 			}	
 			else {
-				this.throwWarning(eventListenerNotFoundError);
+				return this.throwWarning(eventListenerNotFoundError);
 			}	
 
 			if(evt === 'result' && this.eventListeners.result.length === 1) {
@@ -227,14 +231,14 @@ export class TalkToMe extends Combine(Matcher) {
 			}
 		}
 		else {
-			throwWarning(nonCompatibleSpeechRecognitionEventError);
-			return false;
+			return throwWarning(nonCompatibleSpeechRecognitionEventError);
 		}
 
 	}
 
 	throwWarning(msg) {
 		console.warn(msg);	
+		return false;
 	}
 
 	static getSpeechRecogniserConstructor() {
