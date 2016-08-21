@@ -75,10 +75,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
+	// default error messages
 	var defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
 	var nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
 	var eventListenerNotFoundError = 'Sorry the listener you\'re trying to remove isn\'t currently active';
 	var noSpeechDetected = 'Sorry no speech detected!';
+	
+	// a reference to the bound result handler so it can be removed
 	var resultCallback = void 0;
 	
 	var defaultNoSupportFunction = function defaultNoSupportFunction() {
@@ -89,13 +92,24 @@ return /******/ (function(modules) { // webpackBootstrap
 		return Object.keys(speechEvents).indexOf(evt) > -1;
 	};
 	
+	/*
+	 *	Fires after each result has finished being analysed
+	 *	Set the autoRestart property to true so it continues to listen
+	 *	otherwise you'll have to manually use the start method to begin listening again	
+	 */
+	
 	var onEnd = function onEnd() {
 		if (this.autoRestart && this.isListening) {
 			this.start();
 		}
 	};
 	
-	var addDefaultEvents = function addDefaultEvents() {
+	/*
+	 *	Cycles through the event listeners stored and adds them to the instance
+	 *	of the speech recognition constructor used at the heart of Talk To Me
+	 */
+	
+	var addEventListeners = function addEventListeners() {
 		var _this = this;
 	
 		Object.keys(this.eventListeners).forEach(function (listener) {
@@ -115,6 +129,14 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 	};
+	
+	/*
+	 *	The ONLY result event listener added to the speech recognition instance
+	 *	This is because the event object the native API spits out is heavily modified
+	 *	and stripped down to just the results and whether it's the last set of results
+	 *	This stripped down event object is then passed into each registered result callback
+	 *	which is bound so its context is the current instance of Talk To Me
+	 */
 	
 	var onResult = function onResult(event) {
 		var _this2 = this;
@@ -137,6 +159,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 			_classCallCheck(this, TalkToMe);
 	
+			// get the speech recognition constructor and test for support
+	
 			var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(TalkToMe).call(this));
 	
 			var _TalkToMe$getSpeechRe = TalkToMe.getSpeechRecogniserConstructor();
@@ -147,21 +171,32 @@ return /******/ (function(modules) { // webpackBootstrap
 			_this3.support = support;
 	
 			if (_this3.support) {
+	
+				/*
+	    *	Default options (optional)
+	    *	Set against the instance of the speech recognition API
+	    *	And the instance of Talk To Me
+	    */
+	
 				var numOfAlternativeMatches = options.numOfAlternativeMatches;
 				var language = options.language;
 				var finalResultsOnly = options.finalResultsOnly;
 	
-				finalResultsOnly = typeof finalResultsOnly === 'undefined' ? true : !finalResultsOnly;
+				finalResultsOnly = typeof finalResultsOnly === 'undefined' ? false : !finalResultsOnly;
+	
 				_this3.speech = new speech();
 				_this3.speech.maxAlternatives = numOfAlternativeMatches || 5;
 				_this3.speech.interimResults = finalResultsOnly;
 				_this3.speech.lang = language || 'en-US';
+	
 				_this3.isListening = false;
 				_this3.autoRestart = false;
 				_this3.getFirstMatchOnly = true;
 	
+				// store a reference to the bound result callback
 				resultCallback = onResult.bind(_this3);
 	
+				// default event listeners
 				_this3.eventListeners = {
 					start: [],
 					end: [onEnd.bind(_this3)],
@@ -176,16 +211,16 @@ return /******/ (function(modules) { // webpackBootstrap
 					speechstart: []
 				};
 	
-				addDefaultEvents.call(_this3);
+				addEventListeners.call(_this3);
 			} else {
-				var _ret;
-	
 				_this3.throwWarning('Sorry, no speech recognition ability found in this browser.');
-				return _ret = null, _possibleConstructorReturn(_this3, _ret);
 			}
 	
 			return _this3;
 		}
+	
+		// modify the on no support handler
+	
 	
 		_createClass(TalkToMe, [{
 			key: 'onNoSupport',
@@ -194,6 +229,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 				cb();
 			}
+	
+			/*
+	   *	Try / catch will prevent errors thrown if start is called when the
+	   *	speech recognition API has already started to listen.
+	   *	Likewise for stop (see below method)
+	   */
+	
 		}, {
 			key: 'start',
 			value: function start() {
@@ -214,6 +256,14 @@ return /******/ (function(modules) { // webpackBootstrap
 					this.throwWarning(e);
 				}
 			}
+	
+			/*
+	   *	Add event listeners to the instance of the speech recognition API 
+	   *	Stores a reference to the callback and the bound callback (binds the instance of Talk To Me to it)
+	   *	Note: It will not allow more than one 'result' handler because of the way Talk To Me
+	   *	modifies the result event object and passes it into the registered callbacks
+	   */
+	
 		}, {
 			key: 'on',
 			value: function on(evt, callback) {
@@ -228,6 +278,15 @@ return /******/ (function(modules) { // webpackBootstrap
 					return false;
 				}
 			}
+	
+			/*
+	   *	Removes event listeners from the instance of the speech recognition API 
+	   *	Matches the callback, not the bound one as externally there is no reference to it
+	   *	Then removes the bound callback counterpart event listener
+	   *	Note: if the penultimate result event listener is removed, Talk To Me's result listener
+	   *	is also removed, a new instance of Talk To Me is created and the event listeners are re-registered
+	   */
+	
 		}, {
 			key: 'off',
 			value: function off(evt, callback) {
@@ -256,7 +315,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						var speech = _TalkToMe$getSpeechRe2.speech;
 	
 						this.speech = new speech();
-						addDefaultEvents.call(this);
+						addEventListeners.call(this);
 					}
 				} else {
 					throwWarning(nonCompatibleSpeechRecognitionEventError);

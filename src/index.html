@@ -7,19 +7,18 @@
 
 <script src="js/talk-to-me.js"></script>
 <script type="text/javascript">
-	// var count = 0; 
 	var callback = function(result) {
 		console.log('callback', result);	
-		//this.removeMatchTerm(result.term);
 	}
 	var listenFor = {
 		'show' : callback,
 		'washing machines' : callback
 	}
 	var ttm = new TalkToMe();
-	ttm.match(listenFor);
-	ttm.autoRestart = true;
-	ttm.start();
+	console.log(ttm.eventListeners);
+	// ttm.match(listenFor);
+	// ttm.autoRestart = true;
+	// ttm.start();
 </script>
 </body>
 </html>
