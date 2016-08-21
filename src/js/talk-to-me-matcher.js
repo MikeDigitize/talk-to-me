@@ -26,12 +26,15 @@ const resetFindMatches = function() {
 
 const createSearchObject = function(searches, search) {
 
+	let regex = search.lastIndexOf('s') === search.length - 1 ? `${search}?` : search;
+	regex = new RegExp(`${regex}`, 'i');
+
 	return {
 		term : search,
 		results : [],
 		callback : searches[search],
 		callbackUsed : false,
-		regex : new RegExp(`${search}`, 'i')
+		regex : regex
 	};
 
 };
@@ -108,13 +111,12 @@ const fireResults = function(isFinalResult) {
 
 			let { term, results } = this.searchForThese[key];
 
+			this.searchForThese[key].callbackUsed = true;
 			this.searchForThese[key].callback.call(this, { 
 				term, 
 				results, 
 				isFinalResult
-			});
-
-			this.searchForThese[key].callbackUsed = true;
+			});			
 
 		}
 

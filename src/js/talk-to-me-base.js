@@ -129,11 +129,7 @@ export class TalkToMe extends Combine(Matcher) {
 	on(evt, callback) {
 		if(isCompatibleSpeechRecognitionEvent(this.eventListeners, evt)) {
 			let boundCallback = callback.bind(this.speech);
-			if(evt === 'result' && this.eventListeners.result.length === 0) { 
-				this.speech.addEventListener('result', resultCallback);
-				this.eventListeners[evt].push({ resultCallback, resultCallback });
-			}			
-			else if(evt !== 'result') {
+			if(evt !== 'result') {
 				this.speech.addEventListener(evt, boundCallback);
 			}				
 			this.eventListeners[evt].push({ callback, boundCallback });
@@ -161,9 +157,14 @@ export class TalkToMe extends Combine(Matcher) {
 			else {
 				this.throwWarning(eventListenerNotFoundError);
 			}	
+
 			if(evt === 'result' && this.eventListeners.result.length === 1) {
+				
 				this.speech.removeEventListener('result', resultCallback);
-				this.eventListeners.result.splice(0, 1);
+				let { speech } = TalkToMe.getSpeechRecogniserConstructor();
+				this.speech = new speech();
+				addDefaultEvents.call(this);
+
 			}
 		}
 		else {

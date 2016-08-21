@@ -1,1 +1,584 @@
-!function(e,t){if("object"==typeof exports&&"object"==typeof module)module.exports=t();else if("function"==typeof define&&define.amd)define([],t);else{var n=t();for(var r in n)("object"==typeof exports?exports:e)[r]=n[r]}}(this,function(){return function(e){function t(r){if(n[r])return n[r].exports;var i=n[r]={exports:{},id:r,loaded:!1};return e[r].call(i.exports,i,i.exports,t),i.loaded=!0,i.exports}var n={};return t.m=e,t.c=n,t.p="/build",t(0)}([function(e,t,n){"use strict";function r(e,t,n){return t in e?Object.defineProperty(e,t,{value:n,enumerable:!0,configurable:!0,writable:!0}):e[t]=n,e}function i(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function o(e,t){if(!e)throw new ReferenceError("this hasn't been initialised - super() hasn't been called");return!t||"object"!=typeof t&&"function"!=typeof t?e:t}function s(e,t){if("function"!=typeof t&&null!==t)throw new TypeError("Super expression must either be null or a function, not "+typeof t);e.prototype=Object.create(t&&t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),t&&(Object.setPrototypeOf?Object.setPrototypeOf(e,t):e.__proto__=t)}Object.defineProperty(t,"__esModule",{value:!0}),t.TalkToMe=void 0;var c=function(){function e(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(t,n,r){return n&&e(t.prototype,n),r&&e(t,r),t}}(),a=n(1),u=n(2),l=(n(3),"Sorry your browser doesn't support speech recognition"),h="Sorry the speech recognition API does not support this event",f="Sorry the listener you're trying to remove isn't currently active",p="Sorry no speech detected!",v=void 0,d=function(){return alert(l)},b=function(e,t){return Object.keys(e).indexOf(t)>-1},y=function(){this.autoRestart&&this.isListening&&this.start()},g=function(){var e=this;Object.keys(this.eventListeners).forEach(function(t){var n=e.eventListeners[t][0];n&&e.speech.addEventListener(t,n)})},w=function(e){this.isListening&&("no-speech"===e.error?console.warn(p):this.throwWarning(e.error))},m=function(e){var t=this,n=e.results[0].isFinal,r=[].slice.call(e.results[0]);this.eventListeners.result.forEach(function(e,i){0!==i&&t.isListening&&e.boundCallback({isFinalResult:n,results:r})})};t.TalkToMe=function(e){function t(){var e=arguments.length<=0||void 0===arguments[0]?{}:arguments[0];i(this,t);var n=o(this,Object.getPrototypeOf(t).call(this)),r=t.getSpeechRecogniserConstructor(),s=r.speech,c=r.support;if(n.support=c,!n.support){var a;return n.throwWarning("Sorry, no speech recognition ability found in this browser."),a=null,o(n,a)}var u=e.numOfAlternativeMatches,l=e.language,h=e.finalResultsOnly;return h="undefined"==typeof h||!h,n.speech=new s,n.speech.maxAlternatives=u||5,n.speech.interimResults=h,n.speech.lang=l||"en-US",n.isListening=!1,n.autoRestart=!1,n.getFirstMatchOnly=!0,v=m.bind(n),n.eventListeners={start:[],end:[y.bind(n)],audioend:[],audiostart:[],error:[w.bind(n)],nomatch:[],result:[v],soundend:[],soundstart:[],speechend:[],speechstart:[]},g.call(n),n}return s(t,e),c(t,[{key:"onNoSupport",value:function(){var e=arguments.length<=0||void 0===arguments[0]?d:arguments[0];e()}},{key:"start",value:function(){this.isListening=!0;try{this.speech.start()}catch(e){this.throwWarning(e)}}},{key:"stop",value:function(){this.isListening=!1;try{this.speech.abort()}catch(e){this.throwWarning(e)}}},{key:"on",value:function(e,t){if(!b(this.eventListeners,e))return this.throwWarning(h),!1;var n=t.bind(this.speech);"result"===e&&0===this.eventListeners.result.length?(this.speech.addEventListener("result",v),this.eventListeners[e].push(r({resultCallback:v},"resultCallback",v))):"result"!==e&&this.speech.addEventListener(e,n),this.eventListeners[e].push({callback:t,boundCallback:n})}},{key:"off",value:function(e,t){if(!b(this.eventListeners,e))return throwWarning(h),!1;var n=this.eventListeners[e].reduce(function(e,n,r){return n.callback===t&&(e=r),e},-1);n>-1?(this.speech.removeEventListener(e,this.eventListeners[e][n].boundCallback),this.eventListeners[e].splice(n,1)):this.throwWarning(f),"result"===e&&1===this.eventListeners.result.length&&(this.speech.removeEventListener("result",v),this.eventListeners.result.splice(0,1))}},{key:"throwWarning",value:function(e){console.warn(e)}}],[{key:"getSpeechRecogniserConstructor",value:function(){var e=window.SpeechRecognition||window.webkitSpeechRecognition||window.mozSpeechRecognition||window.msSpeechRecognition||window.oSpeechRecognition;return{speech:e,support:!!e}}}]),t}((0,a.Combine)(u.Matcher))},function(e,t){"use strict";function n(){for(var e=function(){},t=arguments.length,n=Array(t),r=0;r<t;r++)n[r]=arguments[r];return e.prototype=n.reduce(function(e,t){return Object.getOwnPropertyNames(t.prototype).forEach(function(n){"constructor"!==n&&(e[n]=t.prototype[n])}),e},{}),e}Object.defineProperty(t,"__esModule",{value:!0}),t.Combine=n},function(e,t){"use strict";function n(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Object.defineProperty(t,"__esModule",{value:!0});var r="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol?"symbol":typeof e},i=function(){function e(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(t,n,r){return n&&e(t.prototype,n),r&&e(t,r),t}}(),o=!1,s=void 0,c=void 0,a=function(e){e.isFinalResult;o&&this.getFirstMatchOnly?o&&u.call(this):f.call(this,e)},u=function(){this.off("result",c),this.searchForThese=b.call(this),o=!1,this.on("result",c)},l=function(e,t){return{term:t,results:[],callback:e[t],callbackUsed:!1,regex:new RegExp(""+t,"i")}},h=function(){var e={};return function(t){return Object.keys(t).forEach(function(n){e[n]||(e[n]=l(t,n))}),e}},f=function(e){var t=(e.results,e.isFinalResult);o?this.getFirstMatchOnly||p.call(this,e):p.call(this,e),t&&(o?u.call(this):this.noMatchFound())},p=function(e){this.searchForThese=Object.assign({},v.call(this,e)),d.call(this,e.isFinalResult)},v=function(e){return Object.keys(this.searchForThese).reduce(function(t,n){var r=e.results.filter(function(e){return e.transcript.match(t[n].regex)});return r.length&&(t[n].results=t[n].results.concat(r[0]),o=!0),t},this.searchForThese)},d=function(e){var t=this;Object.keys(this.searchForThese).forEach(function(n){var r=t.searchForThese[n],i=r.results,o=r.callbackUsed;if(i.length&&!o){var s=t.searchForThese[n],c=s.term,a=s.results;t.searchForThese[n].callback.call(t,{term:c,results:a,isFinalResult:e}),t.searchForThese[n].callbackUsed=!0}})},b=function(){var e=this;return Object.keys(this.searchForThese).reduce(function(t,n){return t[n]=Object.assign({},e.searchForThese[n],{results:[],callbackUsed:!1}),t},{})},y=function(){this.throwWarning("Sorry no matches found, try again?")};t.Matcher=function(){function e(){n(this,e)}return i(e,[{key:"match",value:function(){var e=arguments.length<=0||void 0===arguments[0]?{}:arguments[0];return"object"===("undefined"==typeof e?"undefined":r(e))&&Object.keys(e).length?(this.searchForThese||(s=h(),c=a.bind(this),this.on("result",c)),this.searchForThese=s(e),void(this.noMatchFound||this.onNoMatch())):void this.throwWarning("match expects an object with a key term and a callback value.")}},{key:"onNoMatch",value:function(){var e=arguments.length<=0||void 0===arguments[0]?y:arguments[0];this.noMatchFound=e.bind(this)}},{key:"removeMatchTerm",value:function(e){delete this.searchForThese[e]}}]),e}()},function(e,t){"use strict";function n(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}Object.defineProperty(t,"__esModule",{value:!0});var r=function(){function e(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(t,n,r){return n&&e(t.prototype,n),r&&e(t,r),t}}();t.Conversate=function(){function e(){n(this,e)}return r(e,[{key:"conversate",value:function(e){this.match(e)}}]),e}()}])});
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else {
+		var a = factory();
+		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
+	}
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			exports: {},
+/******/ 			id: moduleId,
+/******/ 			loaded: false
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "/build";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(0);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.TalkToMe = undefined;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _combine = __webpack_require__(1);
+	
+	var _talkToMeMatcher = __webpack_require__(2);
+	
+	var _talkToMeConversate = __webpack_require__(3);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var defaultNoSupportMessage = 'Sorry your browser doesn\'t support speech recognition';
+	var nonCompatibleSpeechRecognitionEventError = 'Sorry the speech recognition API does not support this event';
+	var eventListenerNotFoundError = 'Sorry the listener you\'re trying to remove isn\'t currently active';
+	var noSpeechDetected = 'Sorry no speech detected!';
+	var resultCallback = void 0;
+	
+	var defaultNoSupportFunction = function defaultNoSupportFunction() {
+		return alert(defaultNoSupportMessage);
+	};
+	
+	var isCompatibleSpeechRecognitionEvent = function isCompatibleSpeechRecognitionEvent(speechEvents, evt) {
+		return Object.keys(speechEvents).indexOf(evt) > -1;
+	};
+	
+	var onEnd = function onEnd() {
+		if (this.autoRestart && this.isListening) {
+			this.start();
+		}
+	};
+	
+	var addDefaultEvents = function addDefaultEvents() {
+		var _this = this;
+	
+		Object.keys(this.eventListeners).forEach(function (listener) {
+			var handler = _this.eventListeners[listener][0];
+			if (handler) {
+				_this.speech.addEventListener(listener, handler);
+			}
+		});
+	};
+	
+	var onError = function onError(e) {
+		if (this.isListening) {
+			if (e.error === 'no-speech') {
+				console.warn(noSpeechDetected);
+			} else {
+				this.throwWarning(e.error);
+			}
+		}
+	};
+	
+	var onResult = function onResult(event) {
+		var _this2 = this;
+	
+		var isFinalResult = event.results[0].isFinal;
+		var results = [].slice.call(event.results[0]);
+	
+		this.eventListeners.result.forEach(function (listener, i) {
+			if (i !== 0 && _this2.isListening) {
+				listener.boundCallback({ isFinalResult: isFinalResult, results: results });
+			}
+		});
+	};
+	
+	var TalkToMe = exports.TalkToMe = function (_Combine) {
+		_inherits(TalkToMe, _Combine);
+	
+		function TalkToMe() {
+			var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	
+			_classCallCheck(this, TalkToMe);
+	
+			var _this3 = _possibleConstructorReturn(this, Object.getPrototypeOf(TalkToMe).call(this));
+	
+			var _TalkToMe$getSpeechRe = TalkToMe.getSpeechRecogniserConstructor();
+	
+			var speech = _TalkToMe$getSpeechRe.speech;
+			var support = _TalkToMe$getSpeechRe.support;
+	
+			_this3.support = support;
+	
+			if (_this3.support) {
+				var numOfAlternativeMatches = options.numOfAlternativeMatches;
+				var language = options.language;
+				var finalResultsOnly = options.finalResultsOnly;
+	
+				finalResultsOnly = typeof finalResultsOnly === 'undefined' ? true : !finalResultsOnly;
+				_this3.speech = new speech();
+				_this3.speech.maxAlternatives = numOfAlternativeMatches || 5;
+				_this3.speech.interimResults = finalResultsOnly;
+				_this3.speech.lang = language || 'en-US';
+				_this3.isListening = false;
+				_this3.autoRestart = false;
+				_this3.getFirstMatchOnly = true;
+	
+				resultCallback = onResult.bind(_this3);
+	
+				_this3.eventListeners = {
+					start: [],
+					end: [onEnd.bind(_this3)],
+					audioend: [],
+					audiostart: [],
+					error: [onError.bind(_this3)],
+					nomatch: [],
+					result: [resultCallback],
+					soundend: [],
+					soundstart: [],
+					speechend: [],
+					speechstart: []
+				};
+	
+				addDefaultEvents.call(_this3);
+			} else {
+				var _ret;
+	
+				_this3.throwWarning('Sorry, no speech recognition ability found in this browser.');
+				return _ret = null, _possibleConstructorReturn(_this3, _ret);
+			}
+	
+			return _this3;
+		}
+	
+		_createClass(TalkToMe, [{
+			key: 'onNoSupport',
+			value: function onNoSupport() {
+				var cb = arguments.length <= 0 || arguments[0] === undefined ? defaultNoSupportFunction : arguments[0];
+	
+				cb();
+			}
+		}, {
+			key: 'start',
+			value: function start() {
+				this.isListening = true;
+				try {
+					this.speech.start();
+				} catch (e) {
+					this.throwWarning(e);
+				}
+			}
+		}, {
+			key: 'stop',
+			value: function stop() {
+				this.isListening = false;
+				try {
+					this.speech.abort();
+				} catch (e) {
+					this.throwWarning(e);
+				}
+			}
+		}, {
+			key: 'on',
+			value: function on(evt, callback) {
+				if (isCompatibleSpeechRecognitionEvent(this.eventListeners, evt)) {
+					var boundCallback = callback.bind(this.speech);
+					if (evt !== 'result') {
+						this.speech.addEventListener(evt, boundCallback);
+					}
+					this.eventListeners[evt].push({ callback: callback, boundCallback: boundCallback });
+				} else {
+					this.throwWarning(nonCompatibleSpeechRecognitionEventError);
+					return false;
+				}
+			}
+		}, {
+			key: 'off',
+			value: function off(evt, callback) {
+				if (isCompatibleSpeechRecognitionEvent(this.eventListeners, evt)) {
+	
+					var indexOfCallback = this.eventListeners[evt].reduce(function (ioc, callbacks, i) {
+						if (callbacks.callback === callback) {
+							ioc = i;
+						}
+						return ioc;
+					}, -1);
+	
+					if (indexOfCallback > -1) {
+						this.speech.removeEventListener(evt, this.eventListeners[evt][indexOfCallback].boundCallback);
+						this.eventListeners[evt].splice(indexOfCallback, 1);
+					} else {
+						this.throwWarning(eventListenerNotFoundError);
+					}
+	
+					if (evt === 'result' && this.eventListeners.result.length === 1) {
+	
+						this.speech.removeEventListener('result', resultCallback);
+	
+						var _TalkToMe$getSpeechRe2 = TalkToMe.getSpeechRecogniserConstructor();
+	
+						var speech = _TalkToMe$getSpeechRe2.speech;
+	
+						this.speech = new speech();
+						addDefaultEvents.call(this);
+					}
+				} else {
+					throwWarning(nonCompatibleSpeechRecognitionEventError);
+					return false;
+				}
+			}
+		}, {
+			key: 'throwWarning',
+			value: function throwWarning(msg) {
+				console.warn(msg);
+			}
+		}], [{
+			key: 'getSpeechRecogniserConstructor',
+			value: function getSpeechRecogniserConstructor() {
+				var speech = window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition || window.oSpeechRecognition;
+				return { speech: speech, support: !!speech };
+			}
+		}]);
+	
+		return TalkToMe;
+	}((0, _combine.Combine)(_talkToMeMatcher.Matcher));
+
+/***/ },
+/* 1 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	exports.Combine = Combine;
+	function Combine() {
+		var combined = function combined() {};
+	
+		for (var _len = arguments.length, constructors = Array(_len), _key = 0; _key < _len; _key++) {
+			constructors[_key] = arguments[_key];
+		}
+	
+		combined.prototype = constructors.reduce(function (proto, constructor) {
+			Object.getOwnPropertyNames(constructor.prototype).forEach(function (key) {
+				if (key !== 'constructor') {
+					proto[key] = constructor.prototype[key];
+				}
+			});
+			return proto;
+		}, {});
+		return combined;
+	}
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var hasFoundMatch = false;
+	var createSearches = void 0;
+	var onResultCallback = void 0;
+	
+	var resultMatcher = function resultMatcher(evt) {
+		var isFinalResult = evt.isFinalResult;
+	
+	
+		if (!hasFoundMatch || !this.getFirstMatchOnly) {
+			findMatches.call(this, evt);
+		} else if (hasFoundMatch) {
+			resetFindMatches.call(this);
+		}
+	};
+	
+	var resetFindMatches = function resetFindMatches() {
+	
+		this.off('result', onResultCallback);
+		this.searchForThese = emptyResults.call(this);
+		hasFoundMatch = false;
+		this.on('result', onResultCallback);
+	};
+	
+	var createSearchObject = function createSearchObject(searches, search) {
+	
+		var regex = search.lastIndexOf('s') === search.length - 1 ? search + '?' : search;
+		regex = new RegExp('' + regex, 'i');
+	
+		return {
+			term: search,
+			results: [],
+			callback: searches[search],
+			callbackUsed: false,
+			regex: regex
+		};
+	};
+	
+	var addToSearch = function addToSearch() {
+	
+		var records = {};
+		return function (searches) {
+			Object.keys(searches).forEach(function (search) {
+				if (!records[search]) {
+					records[search] = createSearchObject(searches, search);
+				}
+			});
+			return records;
+		};
+	};
+	
+	var findMatches = function findMatches(evt) {
+		var results = evt.results;
+		var isFinalResult = evt.isFinalResult;
+	
+	
+		if (!hasFoundMatch) {
+			findMatch.call(this, evt);
+		} else if (!this.getFirstMatchOnly) {
+			findMatch.call(this, evt);
+		}
+	
+		if (isFinalResult) {
+			if (hasFoundMatch) {
+				resetFindMatches.call(this);
+			} else {
+				this.noMatchFound();
+			}
+		}
+	};
+	
+	var findMatch = function findMatch(evt) {
+	
+		this.searchForThese = Object.assign({}, searchText.call(this, evt));
+		fireResults.call(this, evt.isFinalResult);
+	};
+	
+	var searchText = function searchText(evt) {
+	
+		return Object.keys(this.searchForThese).reduce(function (results, key) {
+	
+			var match = evt.results.filter(function (result) {
+				return result.transcript.match(results[key].regex);
+			});
+	
+			if (match.length) {
+				results[key].results = results[key].results.concat(match[0]);
+				hasFoundMatch = true;
+			}
+	
+			return results;
+		}, this.searchForThese);
+	};
+	
+	var fireResults = function fireResults(isFinalResult) {
+		var _this = this;
+	
+		Object.keys(this.searchForThese).forEach(function (key) {
+			var _searchForThese$key = _this.searchForThese[key];
+			var results = _searchForThese$key.results;
+			var callbackUsed = _searchForThese$key.callbackUsed;
+	
+	
+			if (results.length && !callbackUsed) {
+				var _searchForThese$key2 = _this.searchForThese[key];
+				var term = _searchForThese$key2.term;
+				var _results = _searchForThese$key2.results;
+	
+	
+				_this.searchForThese[key].callbackUsed = true;
+				_this.searchForThese[key].callback.call(_this, {
+					term: term,
+					results: _results,
+					isFinalResult: isFinalResult
+				});
+			}
+		});
+	};
+	
+	var emptyResults = function emptyResults() {
+		var _this2 = this;
+	
+		return Object.keys(this.searchForThese).reduce(function (searchForThese, key) {
+	
+			searchForThese[key] = Object.assign({}, _this2.searchForThese[key], {
+				results: [],
+				callbackUsed: false
+			});
+	
+			return searchForThese;
+		}, {});
+	};
+	
+	var noMatch = function noMatch() {
+		this.throwWarning('Sorry no matches found, try again?');
+	};
+	
+	var Matcher = exports.Matcher = function () {
+		function Matcher() {
+			_classCallCheck(this, Matcher);
+		}
+	
+		_createClass(Matcher, [{
+			key: 'match',
+			value: function match() {
+				var searches = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	
+				if ((typeof searches === 'undefined' ? 'undefined' : _typeof(searches)) !== 'object' || !Object.keys(searches).length) {
+					this.throwWarning('match expects an object with a key term and a callback value.');
+					return;
+				}
+	
+				if (!this.searchForThese) {
+					createSearches = addToSearch();
+					onResultCallback = resultMatcher.bind(this);
+					this.on('result', onResultCallback);
+				}
+	
+				this.searchForThese = createSearches(searches);
+	
+				if (!this.noMatchFound) {
+					this.onNoMatch();
+				}
+			}
+		}, {
+			key: 'onNoMatch',
+			value: function onNoMatch() {
+				var callback = arguments.length <= 0 || arguments[0] === undefined ? noMatch : arguments[0];
+	
+				this.noMatchFound = callback.bind(this);
+			}
+		}, {
+			key: 'removeMatchTerm',
+			value: function removeMatchTerm(term) {
+				delete this.searchForThese[term];
+			}
+		}]);
+
+		return Matcher;
+	}();
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var conversation = [];
+	
+	var Conversate = exports.Conversate = function () {
+		function Conversate() {
+			_classCallCheck(this, Conversate);
+		}
+	
+		_createClass(Conversate, [{
+			key: "conversate",
+			value: function conversate(matches) {
+				// this.getFirstMatchOnly = false;
+				this.match(matches);
+			}
+		}]);
+
+		return Conversate;
+	}();
+
+	// const createSearch = function() {
+	// 	return new RegExp(this.searchFor.reduce((text, term, i) => {
+	// 		if(i > 0) {
+	// 			text += '|';
+	// 		}
+	// 		text += `${Object.keys(term)[0]}s?`;
+	// 		return text;
+	// 	}, ''), 'i');
+	// }
+
+	/*
+
+	top level object
+
+	{
+		depth : 1 // the amount of questions
+		questions : [{
+			question : 'What would you like to shop for?',
+			answers : {
+				name : ['washing machine', 'TVs']
+				verbs : [
+					{
+						pronoun : 'you',
+						verb : 'show'
+					}, 
+					{
+						pronoun : 'you',
+						verb : ['info', 'information']
+					}
+				],
+				onMatch : function(evt) {
+					console.log('Do you want us to ${verb} ${pronoun} ${results} or ')	
+				}
+			}
+		}]
+	}
+
+
+
+
+	*/
+
+/***/ }
+/******/ ])
+});
+;
+//# sourceMappingURL=talk-to-me.js.map
