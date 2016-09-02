@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { TalkToMe } from '../js/talk-to-me-base';
+import { TalkToMe, onEnd } from '../js/talk-to-me-base';
 
 describe('Talk to me', function() {
 
@@ -148,5 +148,25 @@ describe('Talk to me', function() {
 
 	});
 
+	describe('onEnd method', function() {
+
+		let ttm;
+
+		beforeEach(function() {
+			ttm = new TalkToMe();
+			ttm.isListening = true;
+		});
+
+		it('should restart if auto restart is set to true', function() {
+			ttm.autoRestart = true;
+			expect(onEnd.call(ttm)).to.be.true;
+		});
+
+		it('should not restart if auto restart is not set to true', function() {
+			ttm.autoRestart = false;
+			expect(onEnd.call(ttm)).to.be.undefined;
+		});
+
+	});
 
 });

@@ -59,7 +59,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-	exports.TalkToMe = undefined;
+	exports.TalkToMe = exports.onEnd = undefined;
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
@@ -98,9 +98,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *	otherwise you'll have to manually use the start method to begin listening again	
 	 */
 	
-	var onEnd = function onEnd() {
+	var onEnd = exports.onEnd = function onEnd() {
 		if (this.autoRestart && this.isListening) {
-			this.start();
+			return this.start();
 		}
 	};
 	
@@ -343,7 +343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}]);
 	
 		return TalkToMe;
-	}((0, _combine.Combine)(_talkToMeMatcher.Matcher));
+	}((0, _combine.Combine)(_talkToMeMatcher.Matcher, _talkToMeConversate.Conversate));
 
 /***/ },
 /* 1 */
@@ -393,6 +393,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var createSearches = void 0;
 	var onResultCallback = void 0;
 	
+	// the initial result handler
 	var resultMatcher = function resultMatcher(evt) {
 		var isFinalResult = evt.isFinalResult;
 	
@@ -404,6 +405,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	};
 	
+	// will remove the callback and re-initialise the searches
 	var resetFindMatches = function resetFindMatches() {
 	
 		this.off('result', onResultCallback);
@@ -412,20 +414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		this.on('result', onResultCallback);
 	};
 	
-	var createSearchObject = function createSearchObject(searches, search) {
-	
-		var regex = search.lastIndexOf('s') === search.length - 1 ? search + '?' : search;
-		regex = new RegExp('' + regex, 'i');
-	
-		return {
-			term: search,
-			results: [],
-			callback: searches[search],
-			callbackUsed: false,
-			regex: regex
-		};
-	};
-	
+	// returns a function that adds new search terms
 	var addToSearch = function addToSearch() {
 	
 		var records = {};
@@ -439,14 +428,28 @@ return /******/ (function(modules) { // webpackBootstrap
 		};
 	};
 	
+	// new search terms are stored as objects
+	var createSearchObject = function createSearchObject(searches, search) {
+	
+		var regex = search.lastIndexOf('s') === search.length - 1 ? search : search + 's?';
+		regex = new RegExp('' + regex, 'i');
+	
+		return {
+			term: search,
+			results: [],
+			callback: searches[search],
+			callbackUsed: false,
+			regex: regex
+		};
+	};
+	
+	// handles finding matches and when the last result fires and no matches are found
 	var findMatches = function findMatches(evt) {
 		var results = evt.results;
 		var isFinalResult = evt.isFinalResult;
 	
 	
-		if (!hasFoundMatch) {
-			findMatch.call(this, evt);
-		} else if (!this.getFirstMatchOnly) {
+		if (!hasFoundMatch || !this.getFirstMatchOnly) {
 			findMatch.call(this, evt);
 		}
 	
@@ -459,12 +462,14 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	};
 	
+	// searches for matches against each stored search item and updates the search objects
 	var findMatch = function findMatch(evt) {
 	
 		this.searchForThese = Object.assign({}, searchText.call(this, evt));
 		fireResults.call(this, evt.isFinalResult);
 	};
 	
+	// searches for matches and updates search objects if found
 	var searchText = function searchText(evt) {
 	
 		return Object.keys(this.searchForThese).reduce(function (results, key) {
@@ -482,6 +487,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}, this.searchForThese);
 	};
 	
+	// fires results when a new match has been made
 	var fireResults = function fireResults(isFinalResult) {
 		var _this = this;
 	
@@ -507,6 +513,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		});
 	};
 	
+	// refreshes the search objects upon completion
 	var emptyResults = function emptyResults() {
 		var _this2 = this;
 	
@@ -525,6 +532,25 @@ return /******/ (function(modules) { // webpackBootstrap
 		return this.throwWarning('Sorry no matches found, try again?');
 	};
 	
+	/*
+		Expects an object of key (search term) and value (callback)
+	
+		Creates an object property on the instance called searchForThese to store the above
+	
+		Each time `match` is called it adds to the existing search terms
+	
+		All results are captured in a single handler
+	
+		If a match is yet to be found and events are being produced it will continue to attempt to find matches
+	
+		Once a match is found the callback is fired and the results are stored
+	
+		The callback for a match is only fired once
+	
+		If no matches are found and the Speech Recognition API has finished the no match handler will fire
+	
+	*/
+	
 	var Matcher = exports.Matcher = function () {
 		function Matcher() {
 			_classCallCheck(this, Matcher);
@@ -535,9 +561,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			value: function match() {
 				var searches = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 	
+	
 				if ((typeof searches === 'undefined' ? 'undefined' : _typeof(searches)) !== 'object' || !Object.keys(searches).length) {
 					return this.throwWarning('match expects an object with a key term and a callback value.');
 				}
+	
+				/*
+	    *	If match hasn't been called before add the result callback 
+	    *	and create a cache to use to add new searches to
+	    */
 	
 				if (!this.searchForThese) {
 					createSearches = addToSearch();
@@ -547,6 +579,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 				this.searchForThese = createSearches(searches);
 	
+				// set a default on no match found handler
 				if (!this.noMatchFound) {
 					this.onNoMatch();
 				}
@@ -572,7 +605,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 3 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -584,31 +617,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var conversation = [];
 	
+	var createSearch = function createSearch(searches) {
+		return new RegExp(searches.reduce(function (text, term, i) {
+			if (i > 0) {
+				text += '|';
+			}
+			text += term + 's?';
+			return text;
+		}, ''), 'i');
+	};
+	
 	var Conversate = exports.Conversate = function () {
 		function Conversate() {
 			_classCallCheck(this, Conversate);
 		}
 	
 		_createClass(Conversate, [{
-			key: "conversate",
+			key: 'conversate',
 			value: function conversate(matches) {
-				// this.getFirstMatchOnly = false;
-				this.match(matches);
+				this.getFirstMatchOnly = false;
+				//this.match(matches);
+				console.log(createSearch(Object.keys(matches)));
 			}
 		}]);
 
 		return Conversate;
 	}();
-
-	// const createSearch = function() {
-	// 	return new RegExp(this.searchFor.reduce((text, term, i) => {
-	// 		if(i > 0) {
-	// 			text += '|';
-	// 		}
-	// 		text += `${Object.keys(term)[0]}s?`;
-	// 		return text;
-	// 	}, ''), 'i');
-	// }
 
 	/*
 

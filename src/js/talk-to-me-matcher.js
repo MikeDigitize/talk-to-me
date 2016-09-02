@@ -2,6 +2,7 @@ let hasFoundMatch = false;
 let createSearches;
 let onResultCallback;
 
+// the initial result handler
 const resultMatcher = function(evt) {
 
 	let { isFinalResult } = evt;
@@ -15,6 +16,7 @@ const resultMatcher = function(evt) {
 	
 };
 
+// will remove the callback and re-initialise the searches
 const resetFindMatches = function() {
 
 	this.off('result', onResultCallback);
@@ -24,21 +26,7 @@ const resetFindMatches = function() {
 
 };
 
-const createSearchObject = function(searches, search) {
-
-	let regex = search.lastIndexOf('s') === search.length - 1 ? `${search}?` : search;
-	regex = new RegExp(`${regex}`, 'i');
-
-	return {
-		term : search,
-		results : [],
-		callback : searches[search],
-		callbackUsed : false,
-		regex : regex
-	};
-
-};
-
+// returns a function that adds new search terms
 const addToSearch = function() {
 
 	let records = {};
@@ -51,16 +39,30 @@ const addToSearch = function() {
 		return records;
 	}
 
-}
+};
 
+// new search terms are stored as objects
+const createSearchObject = function(searches, search) {
+
+	let regex = search.lastIndexOf('s') === search.length - 1 ? search : `${search}s?`;
+	regex = new RegExp(`${regex}`, 'i');
+
+	return {
+		term : search,
+		results : [],
+		callback : searches[search],
+		callbackUsed : false,
+		regex : regex
+	};
+
+};
+
+// handles finding matches and when the last result fires and no matches are found
 const findMatches = function(evt) {
 
 	let { results, isFinalResult } = evt;
 
-	if(!hasFoundMatch) {
-		findMatch.call(this, evt);
-	}
-	else if(!this.getFirstMatchOnly) {
+	if(!hasFoundMatch || !this.getFirstMatchOnly) {
 		findMatch.call(this, evt);
 	}
 
@@ -75,6 +77,7 @@ const findMatches = function(evt) {
 
 };
 
+// searches for matches against each stored search item and updates the search objects
 const findMatch = function(evt) {
 	
 	this.searchForThese = Object.assign({}, searchText.call(this, evt));
@@ -82,6 +85,7 @@ const findMatch = function(evt) {
 
 };
 
+// searches for matches and updates search objects if found
 const searchText = function(evt) {
 
 	return Object.keys(this.searchForThese).reduce((results, key) => {
@@ -101,6 +105,7 @@ const searchText = function(evt) {
 
 };
 
+// fires results when a new match has been made
 const fireResults = function(isFinalResult) {
 
 	Object.keys(this.searchForThese).forEach(key => {
@@ -122,8 +127,9 @@ const fireResults = function(isFinalResult) {
 
 	});
 
-}
+};
 
+// refreshes the search objects upon completion
 const emptyResults = function() {
 
 	return Object.keys(this.searchForThese).reduce((searchForThese, key) => {
@@ -143,12 +149,37 @@ const noMatch = function() {
 	return this.throwWarning('Sorry no matches found, try again?');
 }; 
 
+/*
+	Expects an object of key (search term) and value (callback)
+
+	Creates an object property on the instance called searchForThese to store the above
+
+	Each time `match` is called it adds to the existing search terms
+
+	All results are captured in a single handler
+
+	If a match is yet to be found and events are being produced it will continue to attempt to find matches
+
+	Once a match is found the callback is fired and the results are stored
+
+	The callback for a match is only fired once
+
+	If no matches are found and the Speech Recognition API has finished the no match handler will fire
+
+*/
+
 export class Matcher {
 
 	match(searches = {}) {
+
 		if(typeof searches !== 'object' || !Object.keys(searches).length){
 			return this.throwWarning('match expects an object with a key term and a callback value.');
 		}
+
+		/*
+		 *	If match hasn't been called before add the result callback 
+		 *	and create a cache to use to add new searches to
+		 */
 
 		if(!this.searchForThese) {
 			createSearches = addToSearch();
@@ -158,6 +189,7 @@ export class Matcher {
 		
 		this.searchForThese = createSearches(searches);
 		
+		// set a default on no match found handler
 		if(!this.noMatchFound) {
 			this.onNoMatch();
 		}	

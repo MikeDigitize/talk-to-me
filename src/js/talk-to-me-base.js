@@ -25,9 +25,9 @@ const isCompatibleSpeechRecognitionEvent = function(speechEvents, evt) {
  *	otherwise you'll have to manually use the start method to begin listening again	
  */
 
-const onEnd = function() {
+export const onEnd = function() {
 	if(this.autoRestart && this.isListening) {
-		this.start();
+		return this.start();
 	}
 };
 
@@ -81,7 +81,7 @@ const onResult = function(evt) {
 
 }
 
-export class TalkToMe extends Combine(Matcher) {
+export class TalkToMe extends Combine(Matcher, Conversate) {
 
 	constructor(options = {}) {
 

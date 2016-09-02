@@ -1,21 +1,22 @@
 let conversation = [];
 
-export class Conversate {
-	conversate(matches) {
-		// this.getFirstMatchOnly = false;
-		this.match(matches);
-	}
+const createSearch = function(searches) {
+	return new RegExp(searches.reduce((text, term, i) => {
+		if(i > 0) {
+			text += '|';
+		}
+		text += `${term}s?`;
+		return text;
+	}, ''), 'i');
 }
 
-// const createSearch = function() {
-// 	return new RegExp(this.searchFor.reduce((text, term, i) => {
-// 		if(i > 0) {
-// 			text += '|';
-// 		}
-// 		text += `${Object.keys(term)[0]}s?`;
-// 		return text;
-// 	}, ''), 'i');
-// }
+export class Conversate {
+	conversate(matches) {
+		this.getFirstMatchOnly = false;
+		//this.match(matches);
+		console.log(createSearch(Object.keys(matches)));
+	}
+}
 
 /*
 
