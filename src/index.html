@@ -11,13 +11,17 @@
 	function startResponse() {
 		return 'How can I help you today? Do you want to shop or do you want info?'
 	}
-	var callback = function(result) {
-		console.log('callback', result);	
-	};
+	function onMatch(results) {
+	  console.log(results, `So you're interested in ${results.term}?`);
+	  this.removeMatchTerm(results.term);
+	  if(!Object.keys(this.searchForThese).length) {
+	      this.stop();
+	  }
+	}
 	var listenFor = {
-		'hey how are you' : callback,
-		'washing machines' : callback,
-		'how can I help' : callback
+		'hey how are you' : onMatch,
+		'washing machines' : onMatch,
+		'how can I help' : onMatch
 	};
 	var ttm = new TalkToMe();
 	ttm.match(listenFor);
