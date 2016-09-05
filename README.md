@@ -1,8 +1,32 @@
 # Talk to me
 
-* Note this is still under development. Don't use it yet!
+* Note: still under development!
 
-Talk to me is a wrapper around the speech recognition API. There's a base class which provides just the basics in functionality and extensions to the base class which can be combined to create custom builds.
+Talk To Me is a wrapper around the Speech Recognition API. The good news is that it massively simplifies the vanilla API. The bad news is that you're only going to get support if you're using Chrome right now. Not even Firefox supports it, despite claiming you can change flags in the `about:config` it still doesn't work. Try enabling the flags `media.webspeech.recognition.enable` and `media.webspeech.synth.enabled` and then logging `window.mozSpeechRecognition` or `window.SpeechRecognition` in the console to be greeted back by a sad and lonely `undefined`. So as far as conversating with your browser goes, Chrome is the only one ready to have a chat.  
+
+Anyway, support is coming and Talk to Me is ready to run with it when it's available. It's been built in a very specific way, firstly to provide you with a base class that makes all the out-of-the-box functionality super easy to use and secondly to allow you to easily 'bolt on' any additional functionality in the form or additional classes so you can create a custom build to suit your needs.
+
+### Customise 
+
+Edit the `talk-to-me.js` file and add required additional modules to the `Combine` function as a second argument. For multiple extensions wrap them in an array. For example:
+
+```javascript
+export var TalkToMe = Combine(TalkToMeBase, [Matcher, Conversate]);
+
+```
+
+will give you the base wrapper plus the additional functionality from the `Matcher` and `Conversate` bolt-on classes.
+
+```javascript
+// just the base wrapper
+export var TalkToMe = Combine(TalkToMeBase);
+
+// the base wrapper with the additional Matcher class added
+export var TalkToMe = Combine(TalkToMeBase, Matcher);
+
+```
+
+Just run `gulp` when you're done and you'll get a `talk-to-me.js` file which exposes a `TalkToMe` class with your specified functionality. 
 
 ### Usage
 
@@ -30,12 +54,6 @@ const finalResultsOnly = false; // defaults to false
 const ttm = new TalkToMe({ language, numOfAlternativeMatches, finalResultsOnly });
 
 ```
-
-## Versions
-
-### Base class
-
-The base class is available in the `build` folder as `talk-to-me-base.js` or generates by running `gulp base` after you've run `npm i` in your project directory. To manually build on the base class import `TalkToMe` from `talk-to-me-base.js` in to your project and extend it. The base class provides a minimal wrapper around the Speech Recognition API.
 
 ### Base functionality
 
@@ -81,7 +99,7 @@ The `result` event is probably the most important event that the Speech Recognit
 
 The modified event object contains two properties: 
 
-`isFinalResult` - a Boolean that indicates if the Speech Recognition API has finishd analysis. If you've specified `finalResultsOnly` to be `true` when creating your instance of `TalkToMe` you'll only get final results.
+`isFinalResult` - a Boolean that indicates if the Speech Recognition API has finished analysis. If you've specified `finalResultsOnly` to be `true` when creating your instance of `TalkToMe` you'll only get final results.
 
 `results` - an array of analysis result objects each of which contain two properties: `confidence` a floating point Number between 0 and 1 indicating the API's confidence in the result and `transcript` which is a String representation of the speech analysis.
 
@@ -143,19 +161,17 @@ ttm.onNoSupport(function() {
 
 ```
 
-And that's the base class. It's 3.2kb before minification and allows you to build an application using just the essential stuff from the Speech Recognition API.
-
 ### Matcher build
 
-The matcher build is the base class but with a few additional new methods that allow you to scan results for specific terms and run callbacks when a match is found. It's in the `build` folder as `talk-to-me-matcher.js` or generates by running `gulp base:match` after you've run `npm i` in your project directory. 
+The matcher build is the base class but with a few additional methods that allow you to scan results for specific terms and run callbacks when a match is found. Just pop the `Matcher` class as a second argument into the base class's `Combine` function to get these methods.
 
 ### Matcher functionality
 
-The matcher expansion provides just two new methods to the base class - `match` and `noMatch`.
+The matcher expansion provides three new methods to the base class - `match`, `noMatch` and `removeMatchTerm`.
 
 ### Matching terms and phrases
 
-The `match` method is used to search speech recognition results for specific terms and fire specific callbacks if it finds them. It takes an object as an argument that has as many key value pairs as you need, the key being the search term and its value being the callback to fire when that term is found. When a match is found the matched term is passed in to the callback as the first parameter.
+The `match` method is used to search speech recognition results for specific terms and fire specific callbacks if it finds them. It takes an object as an argument that has for its keys search terms and the corresponding values being the callback to fire when that term is found. When a match is found the matched term, the actual result found by the Speech Recognition API and whether it is the final result are passed in to the callback as part of a results object.
 
 ```javascript
 
@@ -165,14 +181,15 @@ The `match` method is used to search speech recognition results for specific ter
 */
 
 
-function onMatch(term) {
-	console.log(`So you're interested in ${term}?`);
+function onMatch(event) {
+  console.log(`So you're interested in ${event.term}?`);
+  console.log(event.matches, event.isFinalResult);
 }
 
 var ttm = new TalkToMe();
 ttm.match({ 
-	'super heroes' : onMatch,
-	'video games' : onMatch
+  'super heroes' : onMatch,
+  'video games' : onMatch
 });
 ttm.start();
 
@@ -188,7 +205,7 @@ The `noMatch` method takes a callback that fires when no matches are found. By d
  * $param {Function} callback // the callback to fire when no matches are found
 */
 function onNoMatches(results) {
-	console.log(`Sorry, do you want to try saying that again?`, results);
+  console.log(`Sorry, do you want to try saying that again?`, results);
 }
 ttm.noMatch(onNoMatches);
 
@@ -196,11 +213,40 @@ ttm.noMatch(onNoMatches);
 
 Both the `match` and `noMatch` methods have the instance of `TalkToMe` they belong to bound to them so any instance properties are accessible within the callbacks.
 
+### Removing a term
+
+If the `autorestart` property is set to true, after a successful result(s) or when the final result comes back and no match is found TalkToMe will start listening for audio again and will re-analyse results against any search terms that have been entered. To remove a search term use the `removeMatchTerm` method.
+
+```javascript
+
+/*
+ * $param {String} term // the search term to remove from the stored terms and callbacks
+*/
+ttm.removeMatchTerm('super heroes')
+
+// example usage
+
+function onMatch(term) {
+  console.log(`So you're interested in ${term}?`);
+  this.removeMatchTerm(term);
+  if(!Object.keys(this.searchForThese).length) {
+      this.stop();
+  }
+}
+
+var ttm = new TalkToMe();
+ttm.match({ 
+  'super heroes' : onMatch,
+  'video games' : onMatch
+});
+ttm.start();
+
+
+```
+
 ### Coming next
 
 * An expansion to create a conversation tree
-* An expansion to connect with the Speech Synthesis API
-* An expansion to add a visual component displaying results / conversations
 
 ### Licence
 
