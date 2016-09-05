@@ -33,9 +33,9 @@ let karmaServer = (configSrc, browsers, done) =>
 
 gulp.task('js', () => {
     let entry = {};
-    entry['talk-to-me'] = 'js/talk-to-me-base.js';
+    entry['talk-to-me'] = 'js/talk-to-me.js';
     let config = Object.assign({}, webpackConfigSrc, { entry });
-    return gulp.src('./src/js/talk-to-me-base.js')
+    return gulp.src('./src/js/talk-to-me.js')
         .pipe(plumber())
         .pipe(webpackStream(config))
         .pipe(gulp.dest(jsDest));

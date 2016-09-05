@@ -1,16 +1,16 @@
-import "babel-core/register";
-import path from "path";
+import 'babel-core/register';
+import path from 'path';
 
 module.exports = config =>
     config.set({
 
-        basePath: "",
+        basePath: '',
 
-        frameworks: ["mocha"],
+        frameworks: ['mocha'],
 
         files: [
-            "../../node_modules/babel-polyfill/browser.js",
-            "./**/*.js"
+            '../../node_modules/babel-polyfill/browser.js',
+            './**/*.js'
         ],
 
         client : {
@@ -18,21 +18,21 @@ module.exports = config =>
         },
 
         preprocessors: {
-            "./**/*.js": ["webpack"]
+            './**/*.js': ['webpack']
         },
 
         webpack: {
             resolve: {
                 root: [
-                    path.resolve("./js"),
-                    path.resolve("./tests")],
-                    extensions: ["", ".js"]
+                    path.resolve('./js'),
+                    path.resolve('./tests')],
+                    extensions: ['', '.js']
             },
             module: {
                 loaders: [{
                     test: /\.js$/,
                     exclude: /node_modules/,
-                    loader: "babel-loader"
+                    loader: 'babel-loader'
                 }]
             }
         },
@@ -42,15 +42,15 @@ module.exports = config =>
         },
 
         plugins: [
-            require("karma-webpack"),
-            require("karma-chrome-launcher"),
-            require("karma-firefox-launcher"),
-            require("karma-phantomjs-launcher"),
-            require("karma-mocha"),
-            require("karma-spec-reporter")
+            require('karma-webpack'),
+            require('karma-chrome-launcher'),
+            require('karma-firefox-launcher'),
+            require('karma-phantomjs-launcher'),
+            require('karma-mocha'),
+            require('karma-spec-reporter')
         ],
 
-        reporters: ["spec"],
+        reporters: ['spec'],
 
         port: 9876,
 
@@ -60,7 +60,7 @@ module.exports = config =>
 
         autoWatch: false,
 
-        browsers: ["PhantomJS", "Chrome", "Firefox"],
+        browsers: ['PhantomJS', 'Chrome', 'Firefox'],
 
         singleRun: true,
 

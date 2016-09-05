@@ -1,20 +1,9 @@
 let conversation = [];
 
-const createSearch = function(searches) {
-	return new RegExp(searches.reduce((text, term, i) => {
-		if(i > 0) {
-			text += '|';
-		}
-		text += `${term}s?`;
-		return text;
-	}, ''), 'i');
-}
-
 export class Conversate {
 	conversate(matches) {
 		this.getFirstMatchOnly = false;
-		//this.match(matches);
-		console.log(createSearch(Object.keys(matches)));
+		console.log(matches);
 	}
 }
 
