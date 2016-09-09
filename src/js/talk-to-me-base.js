@@ -81,7 +81,7 @@ export class TalkToMeBase {
 	constructor(options = {}) {
 
 		// get the speech recognition constructor and test for support
-		let { speech, support } = TalkToMe.getSpeechRecogniserConstructor();
+		let { speech, support } = TalkToMeBase.getSpeechRecogniserConstructor();
 		this.support = support;
 
 		if(this.support) {
@@ -217,7 +217,7 @@ export class TalkToMeBase {
 			if(evt === 'result' && this.eventListeners.result.length === 1) {
 				
 				this.speech.removeEventListener('result', resultCallback);
-				let { speech } = TalkToMe.getSpeechRecogniserConstructor();
+				let { speech } = TalkToMeBase.getSpeechRecogniserConstructor();
 				this.speech = new speech();
 				addEventListeners.call(this);
 

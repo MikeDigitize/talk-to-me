@@ -3,7 +3,7 @@ let conversation = [];
 export class Conversate {
 	conversate(matches) {
 		this.getFirstMatchOnly = false;
-		console.log(matches);
+		this.match(matches);
 	}
 }
 

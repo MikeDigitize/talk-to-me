@@ -57,9 +57,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+		value: true
 	});
-	exports.TalkToMe = undefined;
+	exports.TalkToMe = TalkToMe;
 	
 	var _combine = __webpack_require__(1);
 	
@@ -69,7 +69,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _talkToMeBase = __webpack_require__(4);
 	
-	var TalkToMe = exports.TalkToMe = (0, _combine.Combine)(_talkToMeBase.TalkToMeBase, [_talkToMeMatcher.Matcher, _talkToMeConversate.Conversate]);
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var Talk = function (_Combine) {
+		_inherits(Talk, _Combine);
+	
+		function Talk(options) {
+			_classCallCheck(this, Talk);
+	
+			return _possibleConstructorReturn(this, Object.getPrototypeOf(Talk).call(this, options));
+		}
+	
+		return Talk;
+	}((0, _combine.Combine)(_talkToMeBase.TalkToMeBase, [_talkToMeMatcher.Matcher, _talkToMeConversate.Conversate]));
+	
+	function TalkToMe(options) {
+		return new Talk(options);
+	}
 
 /***/ },
 /* 1 */
@@ -356,7 +376,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			key: "conversate",
 			value: function conversate(matches) {
 				this.getFirstMatchOnly = false;
-				console.log(matches);
+				this.match(matches);
 			}
 		}]);
 
@@ -493,10 +513,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 			// get the speech recognition constructor and test for support
 	
-			var _TalkToMe$getSpeechRe = TalkToMe.getSpeechRecogniserConstructor();
+			var _TalkToMeBase$getSpee = TalkToMeBase.getSpeechRecogniserConstructor();
 	
-			var speech = _TalkToMe$getSpeechRe.speech;
-			var support = _TalkToMe$getSpeechRe.support;
+			var speech = _TalkToMeBase$getSpee.speech;
+			var support = _TalkToMeBase$getSpee.support;
 	
 			this.support = support;
 	
@@ -643,9 +663,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 						this.speech.removeEventListener('result', resultCallback);
 	
-						var _TalkToMe$getSpeechRe2 = TalkToMe.getSpeechRecogniserConstructor();
+						var _TalkToMeBase$getSpee2 = TalkToMeBase.getSpeechRecogniserConstructor();
 	
-						var speech = _TalkToMe$getSpeechRe2.speech;
+						var speech = _TalkToMeBase$getSpee2.speech;
 	
 						this.speech = new speech();
 						addEventListeners.call(this);

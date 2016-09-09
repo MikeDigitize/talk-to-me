@@ -12,7 +12,7 @@
 		return 'How can I help you today? Do you want to shop or do you want info?'
 	}
 	function onMatch(results) {
-	  console.log(results, `So you're interested in ${results.term}?`);
+	  console.log(results, `You said ${results.term}?`);
 	  this.removeMatchTerm(results.term);
 	  if(!Object.keys(this.searchForThese).length) {
 	      this.stop();
@@ -23,7 +23,7 @@
 		'washing machines' : onMatch,
 		'how can I help' : onMatch
 	};
-	var ttm = new TalkToMe();
+	var ttm = TalkToMe();
 	ttm.match(listenFor);
 	ttm.autoRestart = true;
 	ttm.start();	

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "gulp karma:browser-tests",
+    "test": "gulp test",
     "start": "parallelshell \"node index.js\" \"gulp\""
   },
   "repository": {
