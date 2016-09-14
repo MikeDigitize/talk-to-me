@@ -1,7 +1,5 @@
 # Talk to me
 
-* Note: still under development!
-
 Talk To Me is a wrapper around the Speech Recognition API. The good news is that it massively simplifies the vanilla API. The bad news is that you're only going to get support if you're using Chrome right now. Not even Firefox supports it, despite claiming you can change flags in the `about:config` it still doesn't work. 
 
 Try enabling the flags `media.webspeech.recognition.enable` and `media.webspeech.synth.enabled` and then logging `window.mozSpeechRecognition` or `window.SpeechRecognition` in the console to be greeted back by a sad and lonely `undefined`. So as far as conversating with your browser goes, Chrome is the only one ready to have a chat.  
@@ -248,6 +246,7 @@ ttm.start();
 
 ### Coming next
 
+* A UI for conversations
 * An expansion to create a conversation tree
 
 ### Licence
