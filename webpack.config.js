@@ -3,7 +3,6 @@ import path from 'path';
 import webpack from 'webpack';
 
 export var config = {
-    devtool: 'source-map',
     context : path.resolve('src'),
     resolve: {
         root: path.resolve(__dirname + '/src'),
@@ -22,12 +21,6 @@ export var config = {
             loader: 'babel-loader'
         }]
     },
-    plugins : [
-        // new webpack.optimize.UglifyJsPlugin({
-        //     compress: {
-        //         warnings: false
-        //     }
-        // })
-    ],
+    plugins : [],
     watch : true
 };

@@ -34,7 +34,22 @@ let karmaServer = (configSrc, browsers, done) =>
 gulp.task('js', () => {
     let entry = {};
     entry['talk-to-me'] = 'js/talk-to-me.js';
+    let config = Object.assign({}, webpackConfigSrc, { entry, devtool : 'source-map' });
+    return gulp.src('./src/js/talk-to-me.js')
+        .pipe(plumber())
+        .pipe(webpackStream(config))
+        .pipe(gulp.dest(jsDest));
+});
+
+gulp.task('js:build', () => {
+    let entry = {};
+    entry['talk-to-me-minified'] = 'js/talk-to-me.js';
     let config = Object.assign({}, webpackConfigSrc, { entry });
+    config.plugins.push(new webpack.optimize.UglifyJsPlugin({
+        compress: {
+            warnings: false
+        }
+    }));
     return gulp.src('./src/js/talk-to-me.js')
         .pipe(plumber())
         .pipe(webpackStream(config))
@@ -52,8 +67,8 @@ gulp.task('test', done => {
 
 gulp.task('watch', function() {
     gulp.watch(htmlSource, ['html']);
-    gulp.watch(talkToMeSource, ['js']);
+    gulp.watch(talkToMeSource, ['js', 'js:build']);
     gulp.watch(testSource, ['test']);
 });
 
-gulp.task('default', ['html', 'js', 'test', 'watch']);
+gulp.task('default', ['html', 'js', 'js:build', 'test', 'watch']);
